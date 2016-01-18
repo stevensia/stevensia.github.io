@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="个人技术总结，读书笔记，心得等 | 这里是 Stevensia的个人博客，与君共勉。">
+    <meta name="keyword"  content="Python, Steven的博客, Steven Blog, linux">
+    <link rel="shortcut icon" href="img/favicon.ico">
+
+    <title>Python 深入zip与列表推导 - Steven's Blog!</title>
+
+    <link rel="canonical" href="http://universus.cn/python/2015/04/09/Python-zip/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Steven's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About me</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/bigshows/coding1.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/bigshows/coding1.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#python技巧" title="python技巧">python技巧</a>
+                        
+                    </div>
+                    <h1>Python 深入zip与列表推导</h1>
+                    
+                    
+                    <h2 class="subheading"></h2>
+                    
+                    <span class="meta">Posted by Steven's Blog on April 9, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-9 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h2>一.zip的魔法</h2>
+
+<p>关于<code>zip</code>可参考<a href="www.cnblogs.com/BeginMan/archive/2013/03/14/2959447.html">Python强大的zip</a>,这里有几个小技巧</p>
+
+<!--more-->
+
+<h3>(1).压缩，解压缩</h3>
+
+<pre><code>&gt;&gt;&gt; a=[1,2,3]
+&gt;&gt;&gt; b=[4,5,6]
+&gt;&gt;&gt; x,y = zip(*zip(a, b))
+&gt;&gt;&gt; x,y
+((1, 2, 3), (4, 5, 6))
+</code></pre>
+
+<h3>(2).合并相邻的列表项</h3>
+
+<pre><code>&gt;&gt;&gt; a = [1, 2, 3, 4, 5, 6]
+&gt;&gt;&gt; zip(*([iter(a)] * 2))
+[(1, 2), (3, 4), (5, 6)]
+# 过程
+&gt;&gt;&gt; c = iter(a)
+&gt;&gt;&gt; c
+&lt;listiterator object at 0xb69ff40c&gt;
+&gt;&gt;&gt; c = [c][/c]
+&gt;&gt;&gt; c
+[&lt;listiterator object at 0xb69ff40c&gt;]
+&gt;&gt;&gt; c=c*2
+&gt;&gt;&gt; c
+[&lt;listiterator object at 0xb69ff40c&gt;, &lt;listiterator object at 0xb69ff40c&gt;]
+&gt;&gt;&gt; zip(*c)  # 解压
+[(1, 2), (3, 4), (5, 6)]
+</code></pre>
+
+<p>扩展：<code>zip(*([iter(a)] * k))</code> a表示可迭代对象，k表示相邻的k个，Python会自动组合，未匹配组合的则剔除，如：</p>
+
+<pre><code>&gt;&gt;&gt; a = [1, 2, 3, 4, 5, 6]
+&gt;&gt;&gt; zip(*([iter(a)]*4))   # 相邻的四个
+[(1, 2, 3, 4)]
+</code></pre>
+
+<p>扩展如下：</p>
+
+<pre><code>&gt;&gt;&gt; group_adjacent = lambda a, k: zip(*([iter(a)] * k))
+&gt;&gt;&gt; group_adjacent(a, 3)
+[(1, 2, 3), (4, 5, 6)]
+&gt;&gt;&gt; group_adjacent(a, 2)
+[(1, 2), (3, 4), (5, 6)]
+&gt;&gt;&gt; group_adjacent(a, 1)
+[(1,), (2,), (3,), (4,), (5,), (6,)]
+</code></pre>
+
+<p>或者：</p>
+
+<pre><code>&gt;&gt;&gt; zip(a[::2], a[1::2])
+[(1, 2), (3, 4), (5, 6)]
+
+&gt;&gt;&gt; zip(a[::3], a[1::3], a[2::3])
+[(1, 2, 3), (4, 5, 6)]
+
+&gt;&gt;&gt; group_adjacent = lambda a, k: zip(*(a[i::k] for i in range(k)))
+&gt;&gt;&gt; group_adjacent(a, 3)
+[(1, 2, 3), (4, 5, 6)]
+&gt;&gt;&gt; group_adjacent(a, 2)
+[(1, 2), (3, 4), (5, 6)]
+&gt;&gt;&gt; group_adjacent(a, 1)
+[(1,), (2,), (3,), (4,), (5,), (6,)]
+</code></pre>
+
+<h3>3.反转字典</h3>
+
+<pre><code>&gt;&gt;&gt; m = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+&gt;&gt;&gt; dic = dict(zip(m.values(), m.keys()))
+&gt;&gt;&gt; dic
+{1: 'a', 2: 'b', 3: 'c', 4: 'd'}
+
+#过程
+&gt;&gt;&gt; x = m.values()
+&gt;&gt;&gt; y = m.keys()
+&gt;&gt;&gt; x, y
+([1, 3, 2, 4], ['a', 'c', 'b', 'd'])
+&gt;&gt;&gt; d = zip(x, y)
+&gt;&gt;&gt; d
+[(1, 'a'), (3, 'c'), (2, 'b'), (4, 'd')]
+&gt;&gt;&gt; dic = dict(d)
+&gt;&gt;&gt; dic
+{1: 'a', 2: 'b', 3: 'c', 4: 'd'}
+</code></pre>
+
+<h2>二.摊平列表</h2>
+
+<p>如何让[1, 2], [3, 4], [5, 6] 平摊成[1, 2, 3, 4, 5, 6]</p>
+
+<h3>1.<code>itertools</code>模块</h3>
+
+<pre><code>&gt;&gt;&gt; a = [[1, 2], [3, 4], [5, 6]]
+&gt;&gt;&gt; list(itertools.chain.from_iterable(a))
+[1, 2, 3, 4, 5, 6]
+</code></pre>
+
+<p>关于<code>itertools</code>模块参考这里<a href="http://www.cnblogs.com/cython/articles/2169009.html">Python：itertools模块</a></p>
+
+<pre><code>chain(iter1, iter2, ..., iterN)：  给出一组迭代器(iter1, iter2, ..., iterN)，创建一个新迭代器来将所有的迭代器链接起来.
+</code></pre>
+
+<p><code>chain</code>可以写成：</p>
+
+<pre><code>&gt;&gt;&gt; a1, a2, a3 = a[0], a[1], a[2]
+&gt;&gt;&gt; t = chain(a1, a2, a3)
+&gt;&gt;&gt; list(t)
+[1, 2, 3, 4, 5, 6]
+</code></pre>
+
+<p><code>chain.from_iterable</code>：</p>
+
+<pre><code>chain.from_iterable(iterables):一个备用链构造函数，其中的iterables是一个迭代变量，生成迭代序列
+</code></pre>
+
+<p>也就是上面的，如果用生成器函数则可写成：</p>
+
+<pre><code>&gt;&gt;&gt; def f(iterables):
+...     for x in iterables:
+...         for y in x:
+...             yield y
+...           
+&gt;&gt;&gt; t = f(a)
+&gt;&gt;&gt; list(t)
+[1, 2, 3, 4, 5, 6]
+</code></pre>
+
+<h3>2.sum(i, start)</h3>
+
+<pre><code>&gt;&gt;&gt; sum(a, [])
+[1, 2, 3, 4, 5, 6]
+</code></pre>
+
+<p>sum的start默认是0，如：</p>
+
+<pre><code>&gt;&gt;&gt; l = [1,2,3]
+&gt;&gt;&gt; sum(l)
+6
+&gt;&gt;&gt; sum(l, 0)
+6
+&gt;&gt;&gt; sum(l, 100)
+106
+&gt;&gt;&gt; sum(l, -4)
+2
+&gt;&gt;&gt; sum('abcd')
+Traceback (most recent call last):
+  File "&lt;input&gt;", line 1, in &lt;module&gt;
+TypeError: unsupported operand type(s) for +: 'int' and 'str'
+&gt;&gt;&gt; sum('abcd', 'j')
+Traceback (most recent call last):
+  File "&lt;input&gt;", line 1, in &lt;module&gt;
+TypeError: sum() can't sum strings [use ''.join(seq) instead]
+</code></pre>
+
+<p>sum([[1, 2], [3, 4], [5, 6]])相当于：[1,2]+[3,4]+[5,6], 由于默认start为0，前面的加起来为[1,2,3,4,5,6]如果加上0那就语法错误了，所以我们给出start是[],这么一来就可以了，所以<code>sum([[1, 2], [3, 4], [5, 6]], [])</code>就显得十分Pythonic了。</p>
+
+<h3>3.列表推导</h3>
+
+<pre><code>&gt;&gt;&gt; [y for x in a for y in x]
+[1, 2, 3, 4, 5, 6]
+
+做成通用点就这样：
+&gt;&gt;&gt; res = lambda it: [y for x in a for y in x]
+&gt;&gt;&gt; res(a)
+[1, 2, 3, 4, 5, 6]
+
+#演示过程见下面
+</code></pre>
+
+<h3>4.reduce</h3>
+
+<pre><code>&gt;&gt;&gt; l = [[1,2,3],[4,5,6], [7], [8,9]]
+&gt;&gt;&gt; reduce(lambda x,y: x+y,l)
+[1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code></pre>
+
+<h3>5.operator</h3>
+
+<pre><code>&gt;&gt;&gt; import operator
+&gt;&gt;&gt; l = [[1,2,3],[4,5,6], [7], [8,9]]
+&gt;&gt;&gt; reduce(operator.add, l)
+[1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code></pre>
+
+<h2>三.列表推导</h2>
+
+<h3>1.在列表推导中使用if else</h3>
+
+<pre><code>&gt;&gt;&gt; l = [22, 13, 45, 50, 98, 69, 43, 44, 1]
+&gt;&gt;&gt; [x+1 if x &gt;= 45 else x+10 for x in l]    
+# 即  [ (x+1 if x &gt;=45 else x+5)  for x in l ]
+[32, 23, 46, 51, 99, 70, 53, 54, 11]
+
+# 还有一种：
+ [[x+5,x+1][x &gt;= 45] for x in l]   
+</code></pre>
+
+<h3>2.多项列表推导</h3>
+
+<p>对上面列表平摊的解释：</p>
+
+<pre><code>&gt;&gt;&gt;l = [[1, 2, 3], [4, 5, 6], [7], [8, 9]]
+&gt;&gt;&gt;print [y for x in l for y in x]
+[1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code></pre>
+
+<p>流程图如下：</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/BeginMan/486940/o_listshow1.png" alt="" /></p>
+
+<p>程序执行图：演示1.<a href="http://pythontutor.com/visualize.html#code=l+%3D+%5B%5B1,+2,+3%5D,+%5B4,+5,+6%5D,+%5B7%5D,+%5B8,+9%5D%5D%0Aprint+%5By+for+x+in+l+for+y+in+x%5D%0A&amp;mode=display&amp;origin=opt-frontend.js&amp;cumulative=false&amp;heapPrimitives=false&amp;drawParentPointers=false&amp;textReferences=false&amp;showOnlyOutputs=false&amp;py=2&amp;rawInputLstJSON=%5B%5D&amp;curInstr=15">这里</a></p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/BeginMan/486940/o_list1.png" alt="" /></p>
+
+<p>更多：</p>
+
+<pre><code>l = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]
+&gt;&gt;&gt; print [y for x in a for c in x for y in c]
+[1, 2, 3, 4, 5, 6, 7, 8]
+</code></pre>
+
+<p>流程图如下：</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/BeginMan/486940/o_listshow2.png" alt="" /></p>
+
+<p>程序执行图, 演示2.<a href="http://pythontutor.com/visualize.html#code=l+%3D+%5B%5B%5B1,+2%5D,+%5B3,+4%5D%5D,+%5B%5B5,+6%5D,+%5B7,+8%5D%5D%5D%0Aprint+%5By+for+x+in+l+for+c+in+x+for+y+in+c%5D&amp;mode=display&amp;origin=opt-frontend.js&amp;cumulative=false&amp;heapPrimitives=false&amp;drawParentPointers=false&amp;textReferences=false&amp;showOnlyOutputs=false&amp;py=2&amp;rawInputLstJSON=%5B%5D&amp;curInstr=16">这里</a>：</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/BeginMan/486940/o_list2.png" alt="" /></p>
+
+<p>**总结：多个for和if连续使用时，for分开看，if从属性于离它左边最近的那个for，多个 if之间的逻辑关系为 AND;<br />
+**</p>
+
+<h3>3.对于字典</h3>
+
+<pre><code>&gt;&gt;&gt; m = {x: x ** 2 for x in range(5)}
+&gt;&gt;&gt; m
+{0: 0, 1: 1, 2: 4, 3: 9, 4: 16}
+</code></pre>
+
+<p>可以通过迭代字典反转字典：</p>
+
+<pre><code>&gt;&gt;&gt; m = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+&gt;&gt;&gt; m
+{'d': 4, 'a': 1, 'b': 2, 'c': 3}
+&gt;&gt;&gt; {v: k for k, v in m.items()}
+{1: 'a', 2: 'b', 3: 'c', 4: 'd'}
+</code></pre>
+
+<h2>参考</h2>
+
+<p><a href="http://www.oschina.net/translate/thirty-python-language-features-and-tricks-you-may-not-know">1.你可能不知道的 30 个 Python 语言的特点技巧</a></p>
+
+<p><a href="http://stackoverflow.com/questions/406121/flattening-a-shallow-list-in-python">2.Flattening a shallow list in Python</a></p>
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/python/2015/04/09/Python-youdao/" data-toggle="tooltip" data-placement="top" title="Python 实现有道翻译命令行版">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/linux/2015/04/09/SSH-SCP/" data-toggle="tooltip" data-placement="top" title="SSH与SCP小指南">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#linux基础" title="linux基础" rel="14">
+                                    linux基础
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="20">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#linux服务器" title="linux服务器" rel="10">
+                                    linux服务器
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Mysql" title="Mysql" rel="11">
+                                    Mysql
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#OS System" title="OS System" rel="7">
+                                    OS System
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#python技巧" title="python技巧" rel="21">
+                                    python技巧
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#redis" title="redis" rel="14">
+                                    redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#django" title="django" rel="8">
+                                    django
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#tornado" title="tornado" rel="6">
+                                    tornado
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Shell" title="Shell" rel="7">
+                                    Shell
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#git" title="git" rel="5">
+                                    git
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#web开发" title="web开发" rel="2">
+                                    web开发
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#jQuery" title="jQuery" rel="3">
+                                    jQuery
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#人生" title="人生" rel="4">
+                                    人生
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#备份" title="备份" rel="2">
+                                    备份
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Nginx" title="Nginx" rel="3">
+                                    Nginx
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#windows服务器" title="windows服务器" rel="3">
+                                    windows服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python模块" title="python模块" rel="2">
+                                    python模块
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#运维" title="运维" rel="4">
+                                    运维
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python奇技淫巧" title="python奇技淫巧" rel="4">
+                                    python奇技淫巧
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python" title="python" rel="17">
+                                    python
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Unix网络编程" title="Unix网络编程" rel="7">
+                                    Unix网络编程
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#C" title="C" rel="2">
+                                    C
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#ops" title="ops" rel="3">
+                                    ops
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#book" title="book" rel="4">
+                                    book
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#mongodb" title="mongodb" rel="6">
+                                    mongodb
+                                </a>
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/stevensia">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Steven's Blog 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

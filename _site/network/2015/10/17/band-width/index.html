@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="个人技术总结，读书笔记，心得等 | 这里是 Stevensia的个人博客，与君共勉。">
+    <meta name="keyword"  content="Python, Steven的博客, Steven Blog, linux">
+    <link rel="shortcut icon" href="img/favicon.ico">
+
+    <title>理解带宽 - Steven's Blog!</title>
+
+    <link rel="canonical" href="http://universus.cn/network/2015/10/17/band-width/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Steven's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About me</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/bigshows/coding1.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/bigshows/coding1.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#Unix网络编程" title="Unix网络编程">Unix网络编程</a>
+                        
+                    </div>
+                    <h1>理解带宽</h1>
+                    
+                    
+                    <h2 class="subheading"></h2>
+                    
+                    <span class="meta">Posted by Steven's Blog on October 17, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-9 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<p>带宽的单位是”bit/s”，就是单位时间的比特数，如100M带宽，全称为100Mbit/s,或100Mbps.带宽并非像公路一样理解，理解它之前要搞清楚数据是如何发送的。</p>
+
+<p>我们需要回到计算机体系结构中，因为带宽的发源地之一便是计算机系统总线。</p>
+
+<h1 id="section">数据如何发送</h1>
+
+<p>(1). 应用程序首先得将要发送的数据写入该进程的内存地址空间中</p>
+
+<p>(2). 应用程序通过系统函数库接口（比如send函数）向内核发出系统调用，由系统内核来进行随后的操作，它将这些数据<strong>从用户态内存区复制到由内核维护的一段称为内核缓冲区的内存地址空间</strong>。这块地址空间的大小通常是有限的，所有要发送的数据将以队列的形式进入这里，这些数据可能来自于多个进程，每块数据都有一定的额外记号来标记它们的去向。如果要发送的数据比较多，那么该系统调用需要多次进行，<strong>每次复制一定的数据大小，这个大小取决于网络数据包的大小以及内核缓冲区的承载能力</strong>。重复的系统调用体现在应用编程层面重复调用send函数。</p>
+
+<p>(3). 当数据写入内核缓冲区后，内核会通知网卡控制器前来取数据，同时CPU转而处理其他进程。网卡控制器接到通知后，便根据网卡驱动信息得知对应内核缓冲区的地址，将要发送的数据复制到网卡的缓冲区中。注意在以上一系列的数据复制中，数据始终按照连接两端设备的内部总线宽度来复制，也就是字节的整数倍，比如在32位总线的主机系统中，采用PCI-X总线接口的网卡一般使用32位总线宽度，那么从内核缓冲区到网卡缓冲区的数据复制过程中，任何时刻只能复制32位的比特信息。</p>
+
+<p>(4). 网卡缓冲区中的数据需要发送到线路中，同时释放缓冲区来获取更多要发送的数据。但是我们知道，只有二进制的数字信号才可以在线路中传输，所以这时候需要对数据进行字节到位的转换，这种转换不难想象，就是将数据的每个位按照顺序依次发出。</p>
+
+<p>(5). 发送时，网卡会使用内部特定的物理装置来生成可以传播的各种信号，比如在使用铜线线路时，网卡会根据“0”和“1”的变化产生不同的电信号；而使用光纤线路时，网卡会产生不同的光信号。</p>
+
+<p>显然，我们所讲的<strong>带宽是指数据的发送速度</strong>。比如我们的百兆网卡，便是指网卡的最大发送速度为100Mbps，也就是网卡在1秒钟最多可以发出100Mb的数据</p>
+
+<p>参考:<a href="http://book.douban.com/subject/10812787/">《构建高性能Web站点》</a></p>
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/unp/2015/10/15/unp-socket/" data-toggle="tooltip" data-placement="top" title="Unix网络编程之理解Socket与字节序">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/c/2015/10/17/c-bzero/" data-toggle="tooltip" data-placement="top" title="bzero函数">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#linux基础" title="linux基础" rel="14">
+                                    linux基础
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="20">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#linux服务器" title="linux服务器" rel="10">
+                                    linux服务器
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Mysql" title="Mysql" rel="11">
+                                    Mysql
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#OS System" title="OS System" rel="7">
+                                    OS System
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#python技巧" title="python技巧" rel="21">
+                                    python技巧
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#redis" title="redis" rel="14">
+                                    redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#django" title="django" rel="8">
+                                    django
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#tornado" title="tornado" rel="6">
+                                    tornado
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Shell" title="Shell" rel="7">
+                                    Shell
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#git" title="git" rel="5">
+                                    git
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#web开发" title="web开发" rel="2">
+                                    web开发
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#jQuery" title="jQuery" rel="3">
+                                    jQuery
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#人生" title="人生" rel="4">
+                                    人生
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#备份" title="备份" rel="2">
+                                    备份
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Nginx" title="Nginx" rel="3">
+                                    Nginx
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#windows服务器" title="windows服务器" rel="3">
+                                    windows服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python模块" title="python模块" rel="2">
+                                    python模块
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#运维" title="运维" rel="4">
+                                    运维
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python奇技淫巧" title="python奇技淫巧" rel="4">
+                                    python奇技淫巧
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python" title="python" rel="17">
+                                    python
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Unix网络编程" title="Unix网络编程" rel="7">
+                                    Unix网络编程
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#C" title="C" rel="2">
+                                    C
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#ops" title="ops" rel="3">
+                                    ops
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#book" title="book" rel="4">
+                                    book
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#mongodb" title="mongodb" rel="6">
+                                    mongodb
+                                </a>
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/stevensia">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Steven's Blog 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

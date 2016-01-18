@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="个人技术总结，读书笔记，心得等 | 这里是 Stevensia的个人博客，与君共勉。">
+    <meta name="keyword"  content="Python, Steven的博客, Steven Blog, linux">
+    <link rel="shortcut icon" href="img/favicon.ico">
+
+    <title>LAMP+phpAdmin 安装配置 - Steven's Blog!</title>
+
+    <link rel="canonical" href="http://universus.cn/linux/2015/04/06/LAMP-phpAdmin/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Steven's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About me</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/bigshows/coding1.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/bigshows/coding1.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#linux服务器" title="linux服务器">linux服务器</a>
+                        
+                    </div>
+                    <h1>LAMP+phpAdmin 安装配置</h1>
+                    
+                    
+                    <h2 class="subheading"></h2>
+                    
+                    <span class="meta">Posted by Steven's Blog on April 6, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-9 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h2>1.LAMP+phpAdmin 安装配置</h2>
+
+<h3>(1).Apache Web 服务器</h3>
+
+<pre><code>sudo apt-get install apache2  apache2-doc
+</code></pre>
+
+<p>检测是否安装成功：</p>
+
+<pre><code>curl 127.0.0.1
+#或 curl http://localhost
+</code></pre>
+
+<p><strong>注意：ubuntu下安装了apache和nginx，都占用80端口，修改apache的默认端口防止2个程序端口冲突</strong></p>
+
+<!--more-->
+
+<p>修改Apache默认端口：</p>
+
+<blockquote>
+  <p><strong>1.修改 <code>/etc/apache2/ports.conf</code> 将</strong></p>
+  
+  <p>NameVirtualHost *:80</p>
+  
+  <p>Listen 80</p>
+  
+  <p>改为自己需要的端口</p>
+  
+  <p>NameVirtualHost *:8001</p>
+  
+  <p>Listen 8001</p>
+  
+  <p><strong>2.修改/etc/apache2/sites-enabled/000-default 将第一行的</strong></p>
+  
+  <p>&lt;VirtualHost *:80&gt;</p>
+  
+  <p>改为自己需要的端口</p>
+  
+  <p>&lt;VirtualHost *:8001&gt;</p>
+  
+  <p><strong>3.修改 /etc/init.d/apache2/httpd.conf 添加</strong></p>
+  
+  <p>ServerName localhost</p>
+  
+  <p>重启apache服务</p>
+  
+  <p>/etc/init.d/apache2 restart  或者 service apache2 restart</p>
+  
+  <p>然后访问： curl 127.0.0.1:8001 就ok了， 如果部署在服务器上，则本地浏览器打开： webServiceIP:8001 就会出现下面界面：</p>
+</blockquote>
+
+<p>It works!</p>
+
+<p>This is the default web page for this server.</p>
+
+<p>The web server software is running but no content has been added, yet.</p>
+
+<h2>2.PHP5和Apache的php模块</h2>
+
+<pre><code>sudo apt-get install php5 libapache2-mod-php5 
+</code></pre>
+
+<p>重启Apache服务使php模块生效</p>
+
+<pre><code>sudo service apache2 restart 
+</code></pre>
+
+<p>apache启动目录是/var/www/ 所以要测试php5是否安装成功，先编辑一个测试文件在该目录下，</p>
+
+<pre><code>sudo vim /var/www/phpinfo.php
+#php
+&lt;?php  
+   phpinfo();  
+?&gt;  
+</code></pre>
+
+<p>保存后，在浏览器中打开：http://localhost/phpinfo.php，（服务器部署可在本地打开 http://服务器ip:8001/phpinfo.php  即可，注意这里端口8001是自己修改过的而非默认的80端口）</p>
+
+<p><img src="http://images.cnblogs.com/cnblogs_com/BeginMan/486940/o_%e5%b1%8f%e5%b9%95%e5%bf%ab%e7%85%a7%202014-11-16%20%e4%b8%8a%e5%8d%8811.24.02.png" alt="" /></p>
+
+<h2>3.安装Mysql</h2>
+
+<pre><code>sudo apt-get install mysql-server mysql-client
+</code></pre>
+
+<p>然后设置mysql 密码就行了</p>
+
+<h2>4.安装phpmyadmin</h2>
+
+<pre><code>sudo apt-get install phpmyadmin
+</code></pre>
+
+<p>安装中选择apache2 就行，然后再设置密码就ok了，<strong>注意：phpmyadmin安装后并不在apache默认路径下，此时要建立个软链接</strong></p>
+
+<pre><code>sudo ln -s /usr/share/phpmyadmin /var/www
+</code></pre>
+
+<p>重启Apache服务器，然后打开http://localhost/phpmyadmin 就出现了登陆界面，如果出现了mcrypt错误！终端执行：sudo php5enmod mcrypt，然后重启apache，重新登陆phpmyadmin就行了。</p>
+
+<h2>参考</h2>
+
+<p><a href="http://blog.csdn.net/tecn14/article/details/27515241">1.Ubuntu 14.04 配置 LAMP+phpMyAdmin PHP开发环境！</a></p>
+
+<p><a href="http://www.oecp.cn/hi/wlo_o/blog/1168525">2.ubuntu下更改apache的默认端口</a></p>
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/linux/2015/04/06/Centos-yum/" data-toggle="tooltip" data-placement="top" title="Centos yum详解">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/linux/2015/04/06/Linux-find/" data-toggle="tooltip" data-placement="top" title="13个实用的Linux find命令示例">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#linux基础" title="linux基础" rel="14">
+                                    linux基础
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="20">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#linux服务器" title="linux服务器" rel="10">
+                                    linux服务器
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Mysql" title="Mysql" rel="11">
+                                    Mysql
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#OS System" title="OS System" rel="7">
+                                    OS System
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#python技巧" title="python技巧" rel="21">
+                                    python技巧
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#redis" title="redis" rel="14">
+                                    redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#django" title="django" rel="8">
+                                    django
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#tornado" title="tornado" rel="6">
+                                    tornado
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Shell" title="Shell" rel="7">
+                                    Shell
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#git" title="git" rel="5">
+                                    git
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#web开发" title="web开发" rel="2">
+                                    web开发
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#jQuery" title="jQuery" rel="3">
+                                    jQuery
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#人生" title="人生" rel="4">
+                                    人生
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#备份" title="备份" rel="2">
+                                    备份
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Nginx" title="Nginx" rel="3">
+                                    Nginx
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#windows服务器" title="windows服务器" rel="3">
+                                    windows服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python模块" title="python模块" rel="2">
+                                    python模块
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#运维" title="运维" rel="4">
+                                    运维
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python奇技淫巧" title="python奇技淫巧" rel="4">
+                                    python奇技淫巧
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python" title="python" rel="17">
+                                    python
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Unix网络编程" title="Unix网络编程" rel="7">
+                                    Unix网络编程
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#C" title="C" rel="2">
+                                    C
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#ops" title="ops" rel="3">
+                                    ops
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#book" title="book" rel="4">
+                                    book
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#mongodb" title="mongodb" rel="6">
+                                    mongodb
+                                </a>
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/stevensia">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Steven's Blog 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

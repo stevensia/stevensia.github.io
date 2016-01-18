@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="个人技术总结，读书笔记，心得等 | 这里是 Stevensia的个人博客，与君共勉。">
+    <meta name="keyword"  content="Python, Steven的博客, Steven Blog, linux">
+    <link rel="shortcut icon" href="img/favicon.ico">
+
+    <title>2016年读书计划 - Steven's Blog!</title>
+
+    <link rel="canonical" href="http://universus.cn/read/2015/12/30/2016-read-plan/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Steven's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About me</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/bigshows/read_plan.png" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/bigshows/read_plan.png')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#读书" title="读书">读书</a>
+                        
+                    </div>
+                    <h1>2016年读书计划</h1>
+                    
+                    
+                    <h2 class="subheading">读书明志</h2>
+                    
+                    <span class="meta">Posted by Steven's Blog on December 30, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-9 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>因为无知，所以渴望读书；因为怯弱，才会挑战自我！,2016年读书计划正式启动，要沉稳练达，循序渐进。</p>
+</blockquote>
+
+<h2 id="section">约定</h2>
+
+<ul>
+  <li>删除线，加☆：表示已经读完并打分</li>
+  <li>删除线，加☆，附读书笔记：表示已经读完并打分且写了读书笔记</li>
+  <li>删除线，加☆，加粗：表示需要重读</li>
+  <li>只删除线：表示移除</li>
+  <li>其他：待读</li>
+</ul>
+
+<h2 id="section-1">非技术书籍</h2>
+
+<ul>
+  <li><del><a href="http://book.douban.com/subject/4726852/">《正念的奇迹》</a>☆☆☆</del></li>
+  <li><a href="https://book.douban.com/subject/26364209/">《what if 那些古怪又让人忧心的问题》</a></li>
+  <li><del><a href="https://book.douban.com/subject/26363418/">《我坚信》</a>☆☆☆<del></del></del></li>
+  <li><del><a href="http://read.douban.com/ebook/10584286/">《品质德国》</a>☆☆</del></li>
+  <li><a href="https://book.douban.com/subject/26315800/">《智慧社会》</a></li>
+  <li><a href="https://book.douban.com/subject/26304875/">《漫不经心的传奇》</a></li>
+  <li><a href="https://book.douban.com/subject/26299190/">《托尔斯泰与紫绒椅》</a></li>
+  <li><a href="https://book.douban.com/subject/26243522/">《倒带人生》</a></li>
+  <li><a href="https://book.douban.com/subject/26294048/">《黑羊》</a></li>
+  <li><a href="https://book.douban.com/subject/25944034/">《菊次郎与佐纪》</a></li>
+  <li><a href="https://book.douban.com/subject/26342468/">《亲爱的小孩，原谅我不能陪你长大》</a></li>
+  <li><a href="https://book.douban.com/subject/26314627/">《万物：创世》</a></li>
+  <li><a href="https://book.douban.com/subject/26314954/">《光荣与梦想》</a></li>
+  <li><a href="https://book.douban.com/subject/25986341/">《万万没想到》</a></li>
+  <li><a href="https://book.douban.com/subject/26306686/">《创业维艰》</a></li>
+  <li><a href="https://book.douban.com/subject/26296352/">《财富之城》</a></li>
+  <li><a href="https://book.douban.com/subject/26321190/">《黎明之前》</a></li>
+  <li><a href="https://book.douban.com/subject/26291984/">《最后的耍猴人》</a></li>
+  <li><a href="https://book.douban.com/subject/26309691/">《月光落在左手上》</a></li>
+  <li><a href="https://book.douban.com/subject/25985021/">《人类简史》</a></li>
+  <li><a href="https://book.douban.com/subject/25976544/">《故事》</a></li>
+  <li><a href="https://book.douban.com/subject/26253960/">《渴望生活·梵高传（2014版）》</a></li>
+  <li><a href="https://book.douban.com/subject/25900802/">《我在底层的生活》</a></li>
+  <li><a href="https://book.douban.com/subject/25903621/">《写作这回事》</a></li>
+  <li><a href="http://book.douban.com/subject/25928708/">《佛祖都说了些什么?》</a></li>
+  <li><a href="http://book.douban.com/subject/25971478/">《因为山在那里》</a></li>
+  <li><a href="http://book.douban.com/subject/25934176/">《雪隐鹭鸶》</a></li>
+  <li><a href="http://book.douban.com/subject/25928292/">《不懂色彩 不看电影》</a></li>
+  <li><a href="http://book.douban.com/subject/25848747/">《审判为什么不公正》</a></li>
+  <li><a href="http://book.douban.com/subject/25846182/">《鱼羊野史·第1卷》</a></li>
+  <li><a href="http://book.douban.com/subject/20428302/">《失明症漫记》</a></li>
+  <li><a href="http://book.douban.com/subject/25733470/">《没有色彩的多崎作和他的巡礼之年》</a></li>
+  <li><a href="http://book.douban.com/subject/25806352/">《梁思成与他的时代》</a></li>
+  <li><a href="http://book.douban.com/subject/25784438/">《不留心，看不见》</a></li>
+  <li><a href="http://book.douban.com/subject/25731506/">《乱时候，穷时候》</a></li>
+  <li><a href="http://book.douban.com/subject/4207781/">《孩子你慢慢来》</a></li>
+  <li><a href="http://book.douban.com/subject/25804641/">《草草集》</a></li>
+  <li><a href="http://book.douban.com/subject/23008971/">《平如美棠》</a></li>
+  <li><a href="http://book.douban.com/subject/25735727/">《站在两个世界的边缘》</a></li>
+  <li><a href="http://book.douban.com/subject/25745691/">《罗辑思维》</a></li>
+  <li><a href="http://book.douban.com/subject/24871655/">《无比美妙的痛苦》</a></li>
+  <li><a href="http://book.douban.com/subject/24875416/">《生命最后的读书会》</a></li>
+  <li><del><a href="http://book.douban.com/subject/1082154/">《活着》</a>☆☆☆☆☆</del></li>
+  <li><a href="http://book.douban.com/subject/1795079/">《乡土中国》</a></li>
+  <li><a href="http://book.douban.com/subject/1253310/">《人间草木》</a></li>
+  <li><del><a href="http://book.douban.com/subject/24749465/">《断舍离》</a>☆☆</del></li>
+  <li><a href="http://book.douban.com/subject/1084336/">《小王子英文版》</a></li>
+  <li><a href="http://book.douban.com/subject/2284311/">《苏菲的世界》</a></li>
+  <li><a href="http://book.douban.com/subject/25755525/">《戒了吧，拖延症》</a></li>
+  <li><a href="http://book.douban.com/subject/26609056/">《年少荒唐》</a></li>
+  <li><a href="http://book.douban.com/subject/26340138/">《岛上书店》</a></li>
+  <li><del><a href="http://book.douban.com/subject/26610864/">《浮生六记》</a>☆☆☆</del></li>
+</ul>
+
+<h2 id="section-2">技术书籍</h2>
+
+<h3 id="python">Python</h3>
+
+<ul>
+  <li><a href="http://book.douban.com/subject/3948354/">《Python学习手册 : （第3版）》</a></li>
+  <li><a href="http://book.douban.com/subject/26381341/">《Python Cookbook 中文版，第 3 版》</a></li>
+  <li><a href="http://book.douban.com/subject/10773324/">《Python标准库》</a></li>
+  <li><a href="http://book.douban.com/subject/26230343/">《Python网络编程攻略》</a></li>
+  <li><a href="http://book.douban.com/subject/25955274/">《Python编程实战 : 运用设计模式、并发和程序库创建高质量程序》</a></li>
+</ul>
+
+<h3 id="c-">C 三杰</h3>
+
+<ul>
+  <li><a href="http://book.douban.com/subject/3012360/">《C和指针》</a></li>
+  <li><a href="http://book.douban.com/subject/2377310/">《C专家编程》</a></li>
+  <li><a href="http://book.douban.com/subject/2778632/">《C陷阱与缺陷》</a></li>
+</ul>
+
+<h3 id="db">db</h3>
+
+<ul>
+  <li><a href="http://book.douban.com/subject/26612779/">《Redis实战》</a></li>
+  <li>继续攻读<a href="http://book.douban.com/subject/25798102/">《MongoDB权威指南（第2版）》</a></li>
+  <li><a href="http://book.douban.com/subject/25817684/">《深入浅出mysql》</a></li>
+</ul>
+
+<h3 id="section-3">网络编程</h3>
+
+<ul>
+  <li><a href="http://book.douban.com/subject/24722611/">《Linux高性能服务器编程》</a></li>
+  <li>继续攻读<a href="http://book.douban.com/subject/1500149/">《UNIX网络编程 : 第1卷:套接口API(第3版)》</a></li>
+  <li><a href="http://book.douban.com/subject/24737674/">《图解TCP/IP : 第5版》</a></li>
+</ul>
+
+<h3 id="nodejs">nodejs</h3>
+
+<ul>
+  <li><a href="http://book.douban.com/subject/25870705/">《Node.js实战》</a></li>
+  <li><a href="http://book.douban.com/subject/20515024/">《Node即学即用》</a></li>
+  <li>继续攻读<a href="http://book.douban.com/subject/25768396/">《深入浅出Node.js》</a></li>
+</ul>
+
+<h3 id="go">go</h3>
+
+<ul>
+  <li><a href="https://github.com/astaxie/build-web-application-with-golang">《Go Web编程》</a></li>
+</ul>
+
+<h3 id="section-4">算法与设计模式</h3>
+
+<ul>
+  <li><a href="http://book.douban.com/subject/25894685/">《啊哈!算法》</a></li>
+  <li><a href="http://book.douban.com/subject/14267904/">《算法精解 : C语言描述》</a></li>
+  <li><a href="http://book.douban.com/subject/2243615/">《Head First 设计模式（中文版）》</a></li>
+</ul>
+
+<h3 id="section-5">其他</h3>
+
+<ul>
+  <li><del><a href="http://book.douban.com/subject/26602146/">《程序员之禅》</a> ☆☆☆☆☆</del></li>
+</ul>
+
+<p><strong>看来不免一场恶战了！</strong></p>
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/redis/2015/12/28/think-for-redis-monitor/" data-toggle="tooltip" data-placement="top" title="关于redis运维与监控方案的思考">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/book/2015/12/31/Office-worker-the-way-to-waste-life/" data-toggle="tooltip" data-placement="top" title="《上班，浪费生命的正确方法》">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#linux基础" title="linux基础" rel="14">
+                                    linux基础
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="20">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#linux服务器" title="linux服务器" rel="10">
+                                    linux服务器
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Mysql" title="Mysql" rel="11">
+                                    Mysql
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#OS System" title="OS System" rel="7">
+                                    OS System
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#python技巧" title="python技巧" rel="21">
+                                    python技巧
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#redis" title="redis" rel="14">
+                                    redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#django" title="django" rel="8">
+                                    django
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#tornado" title="tornado" rel="6">
+                                    tornado
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Shell" title="Shell" rel="7">
+                                    Shell
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#git" title="git" rel="5">
+                                    git
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#web开发" title="web开发" rel="2">
+                                    web开发
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#jQuery" title="jQuery" rel="3">
+                                    jQuery
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#人生" title="人生" rel="4">
+                                    人生
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#备份" title="备份" rel="2">
+                                    备份
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Nginx" title="Nginx" rel="3">
+                                    Nginx
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#windows服务器" title="windows服务器" rel="3">
+                                    windows服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python模块" title="python模块" rel="2">
+                                    python模块
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#运维" title="运维" rel="4">
+                                    运维
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python奇技淫巧" title="python奇技淫巧" rel="4">
+                                    python奇技淫巧
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python" title="python" rel="17">
+                                    python
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Unix网络编程" title="Unix网络编程" rel="7">
+                                    Unix网络编程
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#C" title="C" rel="2">
+                                    C
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#ops" title="ops" rel="3">
+                                    ops
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#book" title="book" rel="4">
+                                    book
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#mongodb" title="mongodb" rel="6">
+                                    mongodb
+                                </a>
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/stevensia">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Steven's Blog 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

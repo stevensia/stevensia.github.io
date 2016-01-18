@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="个人技术总结，读书笔记，心得等 | 这里是 Stevensia的个人博客，与君共勉。">
+    <meta name="keyword"  content="Python, Steven的博客, Steven Blog, linux">
+    <link rel="shortcut icon" href="img/favicon.ico">
+
+    <title>Linux防火墙 - Steven's Blog!</title>
+
+    <link rel="canonical" href="http://universus.cn/python/2015/09/08/linux-firewall/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Steven's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About me</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/bigshows/coding1.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/bigshows/coding1.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#python" title="python">python</a>
+                        
+                    </div>
+                    <h1>Linux防火墙</h1>
+                    
+                    
+                    <h2 class="subheading"></h2>
+                    
+                    <span class="meta">Posted by Steven's Blog on September 8, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-9 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<p>防火墙这个概念我们都清楚，我们伟大的GFW就是世界上最大的防火墙。</p>
+
+<p><img src="http://beginman.qiniudn.com/gfw.jpg" alt="" /></p>
+
+<p>linux下防火墙工作在<strong>网络层</strong>， 就是<strong>对TCP/IP数据包进行过滤，属于包过滤防火墙</strong>，包过滤机制是：<code>netfilter</code>, 管理防火墙规则命令工具：<code>iptables</code></p>
+
+<h1 id="iptables">一.iptables的规则表、链结构</h1>
+<p>iptables管理4个表、以及他们的规则链:</p>
+
+<h2 id="filter">1.filter</h2>
+<p>用于路由网络数据包</p>
+
+<ul>
+  <li>INPUT 网络数据包流向服务器</li>
+  <li>OUTPUT 网络数据包从服务器流出</li>
+  <li>FORWARD 网络数据包经服务器路由</li>
+</ul>
+
+<h2 id="nat">2.nat</h2>
+<p>nat,用于NAT表.NAT(Net Address Translation )是一种IP地址转换方法。</p>
+
+<ul>
+  <li>PREROUTING, (prerouting, pre-route，预路由, 到达前)网络数据包到达服务器时可以被修改</li>
+  <li>POSTROUTING, (postrouting, post-route，流出前) 网络数据包在即将从服务器发出时可以被修改</li>
+  <li>OUTPUT 网络数据包流出服务器</li>
+</ul>
+
+<h2 id="mangle">3.mangle</h2>
+<p>mangle,用于修改网络数据包的表，如TOS(Type Of Service),TTL(Time To Live),等</p>
+
+<ul>
+  <li>INPUT 网络数据包流向服务器</li>
+  <li>OUTPUT 网络数据包流出服务器</li>
+  <li>FORWARD 网络数据包经由服务器转发</li>
+  <li>PREROUTING 网络数据包到达服务器时可以被修改</li>
+  <li>POSTROUTING 网络数据包在即将从服务器发出时可以被修改</li>
+</ul>
+
+<h2 id="raw">4.raw</h2>
+<p>raw, 用于决定数据包是否被跟踪机制处理</p>
+
+<ul>
+  <li>OUTPUT 网络数据包流出服务器</li>
+  <li>PREROUTING 网络数据包到达服务器时可以被修改</li>
+</ul>
+
+<h1 id="section">二.数据包过滤匹配流程</h1>
+<ul>
+  <li>规则表之间的优先顺序:raw&gt;mangle&gt;nat&gt;filter</li>
+  <li>规则链之间的优先顺序:入站数据流向&gt;转发数据流向&gt;出站数据流向</li>
+</ul>
+
+<h1 id="iptables-1">三.管理和配置Iptables规则</h1>
+
+<h2 id="section-1">1.基本语法</h2>
+
+<pre><code>iptables [-t 表名] 命令选项 [链名] [条件匹配] [-] 目标动作或跳转
+</code></pre>
+
+<ul>
+  <li>表名链名用于指定iptables命令所做对象，未指定默认filter表</li>
+  <li>命令选项指于管理iptables规则的方式（插入、删除··）；</li>
+  <li>条件匹配指定对条件的符合而处理；</li>
+  <li>目标动作或跳转指定数据包的处理方式。</li>
+</ul>
+
+<h2 id="iptables-2">2.管理iptables规则</h2>
+
+<h3 id="section-2">2.1控制选项</h3>
+
+<ul>
+  <li><code>-A</code> 在链尾添加一条规则</li>
+  <li><code>-D</code> 从链中删除一条规则</li>
+  <li><code>-I</code> 在链中插入一条规则</li>
+  <li><code>-R</code> 修改、替换某链的某规则</li>
+  <li><code>-L</code> 列出某个链上的规则</li>
+  <li><code>-F</code> 清空链，删除链上的所有规则</li>
+  <li><code>-N</code> 创建一个新链</li>
+  <li><code>-X</code> 删除某个规则链</li>
+  <li><code>-P</code> 定义某个链的默认策略</li>
+  <li><code>-n</code> 数字形式显示结果</li>
+  <li><code>-v</code> 查看规则列表详细信息</li>
+  <li><code>-V</code> 查看iptables命令工具版本</li>
+  <li><code>-h</code> 查看命令帮助信息</li>
+  <li><code>-line-numbers</code> 查看规则列表，显示顺序号</li>
+</ul>
+
+<h3 id="section-3">2.2增加、插入、删除和替换规则</h3>
+
+<pre><code>iptables  [-t表名]  &lt;-A | I | D | R&gt; 链名 [规则编号] [-i | o 网卡名称] [-p 协议类型] [-s 源IP地址 | 源子网] [--sport 源端口号] [-d目标IP地址 | 目标子网] [--dport目标端口号] &lt;-j动作&gt;
+</code></pre>
+
+<p>参数说明如下。</p>
+
+<ul>
+  <li><code>[-t表名]</code>：定义默认策略将应用于哪个表，可以使用filter、nat和mangle，如果没有指定使用哪个表，iptables就默认使用filter表。</li>
+  <li><code>-A</code>：新增加一条规则，该规则将会增加到规则列表的最后一行，该参数不能使用规则编号。</li>
+  <li><code>-I</code>：插入一条规则，原本该位置上的规则将会往后顺序移动，如果没有指定规则编号，则在第一条规则前插入。</li>
+  <li><code>-D</code>：从规则列表中删除一条规则，可以输入完整规则，或直接指定规则编号加以删除。</li>
+  <li><code>-R</code>：替换某条规则，规则被替换并不会改变顺序，必须要指定替换的规则编号。</li>
+  <li><code>&lt;链名&gt;</code>：指定查看指定表中哪个链的规则列表，可以使用INPUT、OUTPUT、FORWARD、PREROUTING、OUTPUT和POSTROUTING。</li>
+  <li><code>[规则编号]</code>：规则编号用于插入、删除和替换规则时用，编号是按照规则列表的顺序排列，规则列表中第一条规则的编号为1。</li>
+  <li><code>[-i | o 网卡名称]</code>：i是指定数据包从哪块网卡进入，o是指定数据包从哪块网卡输出。网卡名称可以使用ppp0、eth0和eth1等。</li>
+  <li><code>[-p 协议类型]</code>：可以指定规则应用的协议，包含TCP、UDP和ICMP等。</li>
+  <li><code>[-s 源IP地址 | 源子网]</code>：源主机的IP地址或子网地址。</li>
+  <li><code>[--sport 源端口号]</code>：数据包的IP的源端口号。</li>
+  <li><code>[-d目标IP地址 | 目标子网]</code>：目标主机的IP地址或子网地址。</li>
+  <li><code>[--dport目标端口号]</code>：数据包的IP的目标端口号。 </li>
+  <li><code>&lt;-j动作&gt;</code>：处理数据包的动作，各个动作的详细说明可以参考表10-3。 </li>
+</ul>
+
+<h4 id="section-4">(1).插入</h4>
+
+<pre><code>iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+</code></pre>
+
+<h4 id="section-5">(2).查看</h4>
+
+<pre><code>查看Filter表的INPUT链中的所有规则，同时显示顺序号
+
+[root@xx ~]# iptables -L INPUT --line-numbers
+Chain INPUT (policy ACCEPT)
+num  target     prot opt source               destination
+1    ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:8070
+2    ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:8090
+3    ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:ospf-lite
+4    ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:cslistener
+5    ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:irdmi
+6    ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:mysql
+7    ACCEPT     all  --  anywhere             anywhere            state RELATED,ESTABLISHED
+8    ACCEPT     icmp --  anywhere             anywhere
+9    ACCEPT     all  --  anywhere             anywhere
+10   ACCEPT     tcp  --  anywhere             anywhere            state NEW tcp dpt:ssh
+11   REJECT     all  --  anywhere             anywhere            reject-with icmp-host-prohibited
+
+查看filter表各链中所有规则的详细信息，以数字形式显示地址和端口信息
+[root@lingzhixun ~]# iptables -vnL
+Chain INPUT (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+   14  1780 ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0           tcp dpt:8070
+   14  1780 ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0           tcp dpt:8090
+   49  5978 ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0           tcp dpt:8899
+  251 42782 ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0           tcp dpt:9000
+ 2793  174K ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0           tcp dpt:8000
+19175   25M ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0           tcp dpt:3306
+ 508K  272M ACCEPT     all  --  *      *       0.0.0.0/0            0.0.0.0/0           state RELATED,ESTABLISHED
+   69  5520 ACCEPT     icmp --  *      *       0.0.0.0/0            0.0.0.0/0
+ 1412 84664 ACCEPT     all  --  lo     *       0.0.0.0/0            0.0.0.0/0
+   12   768 ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0           state NEW tcp dpt:22
+ 3783  494K REJECT     all  --  *      *       0.0.0.0/0            0.0.0.0/0           reject-with icmp-host-prohibited
+
+Chain FORWARD (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+    0     0 REJECT     all  --  *      *       0.0.0.0/0            0.0.0.0/0           reject-with icmp-host-prohibited
+
+Chain OUTPUT (policy ACCEPT 304K packets, 48M bytes)
+ pkts bytes target     prot opt in     out     source               destination
+</code></pre>
+
+<h4 id="section-6">(3).删除、清空规则:</h4>
+
+<p>删除Filter表的INPUT链中的第2条规则</p>
+
+<pre><code>[root@s2 ~]# iptables -D INPUT 2
+</code></pre>
+
+<p>清空filter表、nat表、mangle表各链中的所有规则	</p>
+
+<pre><code>[root@s2 ~]# iptables -F
+[root@s2 ~]# iptables -t nat -F
+[root@s2 ~]# iptables -t mangle -F
+</code></pre>
+
+<h4 id="section-7">(4). 设置规则链的默认策略</h4>
+<p>最基本的两种策略为ACCEPT（允许）、DROP（丢弃）</p>
+
+<p>将filter表中的FORWARD规则链的默认策略设为 DROP</p>
+
+<pre><code>[root@s2 ~]# iptables -t filter -P FORWARD DROP
+</code></pre>
+
+<p>将filter表中的 OUTPUT规则链的默认策略设为 ACCEPT</p>
+
+<pre><code>[root@s2 ~]# iptables -P OUTPUT ACCEPT
+</code></pre>
+
+<h4 id="iptables-3">(5). 获得iptables相关选项用法的帮助信息</h4>
+<p>查看iptables命令中关于icmp协议的信息</p>
+
+<pre><code>[root@s2 ~]# iptables -p icmp -h
+</code></pre>
+
+<h4 id="section-8">(6). 新增、删除自定义规则链</h4>
+<p>清空raw表中自定义的所有规则链</p>
+
+<pre><code>[root@s2 ~]# iptables -t raw -X
+</code></pre>
+
+<h3 id="section-9">2.3 基础命令</h3>
+
+<p>如下开放80，22，3306端口：</p>
+
+<pre><code>#/sbin/iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+#/sbin/iptables -I INPUT -p tcp --dport 22 -j ACCEPT
+#/sbin/iptables -I INPUT -p tcp --dport 3306 -j ACCEPT
+</code></pre>
+
+<p>然后保存：</p>
+
+<pre><code>#/etc/rc.d/init.d/iptables save
+</code></pre>
+
+<p>查看打开的端口：</p>
+
+<pre><code># /etc/init.d/iptables status
+
+表格：filter
+Chain INPUT (policy ACCEPT)
+num  target     prot opt source               destination
+1    ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           tcp dpt:8070
+2    ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           tcp dpt:8090
+3    ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           tcp dpt:8899
+4    ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           tcp dpt:9000
+5    ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           tcp dpt:8000
+6    ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           tcp dpt:3306
+7    ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           state RELATED,ESTABLISHED
+8    ACCEPT     icmp --  0.0.0.0/0            0.0.0.0/0
+9    ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0
+10   ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           state NEW tcp dpt:22
+11   REJECT     all  --  0.0.0.0/0            0.0.0.0/0           reject-with icmp-host-prohibited
+
+Chain FORWARD (policy ACCEPT)
+num  target     prot opt source               destination
+1    REJECT     all  --  0.0.0.0/0            0.0.0.0/0           reject-with icmp-host-prohibited
+
+Chain OUTPUT (policy ACCEPT)
+num  target     prot opt source               destination
+</code></pre>
+
+<p>重启后永久性生效：</p>
+
+<pre><code>开启：chkconfig iptables on
+关闭：chkconfig iptables off
+</code></pre>
+
+<p>即时生效，重启后失效：</p>
+
+<pre><code>开启：service iptables start
+关闭：service iptables stop
+</code></pre>
+
+<p>关闭防火墙</p>
+
+<pre><code>/etc/init.d/iptables stop
+service iptables stop # 停止服务
+</code></pre>
+
+<p>查看防火墙信息</p>
+
+<pre><code>/etc/init.d/iptables status
+</code></pre>
+
+<p>重启防火墙以便改动生效:(或者直接重启系统)</p>
+
+<pre><code>/etc/init.d/iptables restart
+</code></pre>
+
+<p>将更改进行保存</p>
+
+<pre><code>/etc/rc.d/init.d/iptables save
+</code></pre>
+
+<h2 id="section-10">3.条件匹配</h2>
+
+<h3 id="section-11">1&gt;.通用条件匹配</h3>
+
+<p>一般直接使用，而不依赖于其他的条件匹配及其扩展。常见匹配方式如下：</p>
+
+<p>协议匹配：用于检查数据包的网络协议</p>
+
+<pre><code>拒绝进入防火墙的所有icmp协议数据包
+[root@s2 ~]# iptables -I INPUT -p icmp -j REJECT
+
+允许防火墙转发除icmp协议以外的所有数据包（“！”反取）	
+[root@s2 ~]# iptables -A FORWARD -p ! icmp -j ACCEPT
+[root@s2 ~]# iptables -L FORWARD
+Chain FORWARD (policy DROP)
+target     prot opt source               destination         
+ACCEPT    !icmp --  anywhere             anywhere    
+</code></pre>
+
+<p>地址匹配：用于检查数据包的IP地址、网络地址。</p>
+
+<pre><code>拒绝转发来自192.168.1.11主机的数据，允许来自192.168.0.0/24网段数据
+[root@s2 ~]# iptables -A FORWARD -s 192.168.1.11 -j REJECT
+[root@s2 ~]# iptables -A FORWARD -s 192.168.0.0/24 -j ACCEPT
+</code></pre>
+
+<p>网络接口匹配：用于检查数据包从防火墙的哪个接口进入或离开</p>
+
+<pre><code>丢弃从外网接口（eth1）进入防火墙本机的源地址为私网地址的数据包
+[root@s2 ~]# iptables -A INPUT -i eth1 -s 192.168.0.0/16 -j DROP
+[root@s2 ~]# iptables -A INPUT -i eth1 -s 172.16.0.0/12 -j DROP
+[root@s2 ~]# iptables -A INPUT -i eth1 -s 10.0.0.0/8 -j DROP
+
+封堵IP地址段！并2小时后解锁
+[root@s2 ~]# iptables -I INPUT -s 10.20.30.0/24 -j DROP
+[root@s2 ~]# iptables -I FORWARD -s 10.20.30.0/24 -j DROP
+[root@s2 ~]# at now +2 hours
+at&gt; iptables -D INPUT 1
+at&gt; iptables -D FORWARD 1
+at&gt; &lt;EOT&gt;
+job 1 at 2010-04-25 17:43
+</code></pre>
+
+<h3 id="section-12">2&gt;.隐含条件匹配</h3>
+
+<p>通常需要以指定的协议匹配为前提，对应功能由iptables自动装载内核。常见的隐含匹配方式如下：</p>
+
+<p>端口匹配：用于检查数据包的TCP或UDP端口号</p>
+
+<pre><code>仅允许系统管理员从202.13.0.0/16网段使用SSH方式远程登录防火墙主机
+[root@s2 ~]# iptables -A INPUT -p tcp --dport 22 -s 202.13.0.0/16 -j ACCEPT
+[root@s2 ~]# iptables -A INPUT -p tcp --dport 22 -j DROP
+
+允许本机开放TCP端口的 20 ~ 1024 提供的应用服务
+[root@s2 ~]# iptables -A INPUT -p tcp --dport 20:1024 -j ACCEPT
+[root@s2 ~]# iptables -A OUTPUT -p tcp --sport 20:1024 -j ACCEPT
+
+允许转发来自192.168.0.0/24局域网段的DNS解析请求数据包
+[root@s2 ~]# iptables -A FORWARD -s 192.168.0.0/24 -p udp --dport 53 -j ACCEPT
+[root@s2 ~]# iptables -A FORWARD -d 192.168.0.0/24 -p udp --sport 53 -j ACCEPT
+</code></pre>
+
+<p>TCP标记匹配：用于检查数据包的TCP标记位</p>
+
+<pre><code>拒绝从外网接口（eth1）直接访问防火墙本机的数据包，但允许响应防火墙TCP请求的数据包进入
+[root@s2 ~]# iptables -P INPUT DROP
+[root@s2 ~]# iptables -I INPUT -i eth1 -p tcp --tcp-flags SYN, RST, ACK SYN -j REJECT
+[root@s2 ~]# iptables -I INPUT -i eth1 -p tcp --tcp-flags ! --syn -j ACCEPT
+</code></pre>
+
+<p>ICMP类型匹配：用于检查ICMP数据包</p>
+
+<pre><code>禁止其他主机ping防火墙主机，但是允许防火墙能ping其他主机
+[root@s2 ~]# iptables -A INPUT -p icmp --icmp-type Echo-Request -j DROP
+[root@s2 ~]# iptables -A INPUT -p icmp --icmp-type Echo-Reply -j ACCEPT
+[root@s2 ~]# iptables -A INPUT -p icmp --icmp-type destination-Unreachable -j ACCEPT
+</code></pre>
+
+<p>显示条件匹配：需要额外的内核模块提供，因此需要手工指定匹配方式</p>
+
+<pre><code>MAC地址匹配：主要检查数据包的源MAC地址
+	[root@s2 ~]# iptables -A FORWARD -m mac --mac-source 00:0c:29:27:55:3F -j DROP
+
+多端口匹配：检查数据包的源端口、目标端口时，用于匹配多个不连续的端口号。
+	[root@s2 ~]# iptables -A INPUT -p tcp -m multiport --dport 20.21.24.11.1250:1280 -j ACCEPT
+
+多IP地址匹配：检查数据包的源地址、目标地址时，用于匹配一段范围内的IP地址
+	[root@s2 ~]# iptables -A FORWARD -p tcp -m iprange --src-range 192.168.1.20-192.168.1.99 -j DROP
+</code></pre>
+
+<p>状态匹配：基于iptables的状态跟踪机制，检查数据包的连接状态</p>
+
+<pre><code>禁止转发与正常TCP连接无关的非--syn请求数据包
+	[root@s2 ~]# iptables -A FORWARD -m state --state NEW -p tcp ! --syn -j DROP
+</code></pre>
+
+<h2 id="section-13">4.数据包控制</h2>
+
+<p>最常见处理方式;</p>
+
+<ul>
+  <li>ACCEPT:允许数据包通过</li>
+  <li>DROP：直接丢弃数据包，不给任何回应信息</li>
+  <li>REJECT：拒绝数据包通过，必要时发个响应信息</li>
+  <li>LOG: 记录日志信息，将数据包递给下一条规则</li>
+</ul>
+
+<p>对于尝试通过SSH方式登录防火墙主机的访问数据，记录日志信息并禁止访问</p>
+
+<pre><code>[root@s2 ~]# iptables -I INPUT -p tcp --dport 22 -j DROP
+[root@s2 ~]# iptables -I INPUT -p tcp --dport 22 -j LOG
+</code></pre>
+
+<ul>
+  <li>用户自定义链：将数据传给用户自定义的链进行处理</li>
+</ul>
+
+<p>自定义一个链MYLAN 转发至192.168.1.0/24 网段数据包交给该链中的规则处理。</p>
+
+<pre><code>[root@s2 ~]# iptables -t filter -N MYLAN
+[root@s2 ~]# iptables -A FORWARD -s 192.168.1.0/24 -j MYLAN
+[root@s2 ~]# iptables -A FORWARD -d 192.168.1.0/24 -j MYLAN
+[root@s2 ~]# iptables -A MYLAN -p icmp -j DROP
+</code></pre>
+
+<ul>
+  <li>SNAT:（源地址转换）修改数据包的源IP地址</li>
+  <li>DNAT:（目标地址转换）修改数据包的目标IP地址</li>
+</ul>
+
+<h1 id="section-14">三.实际应用</h1>
+<p>一方面是为了限制，另一方面则是为了安全，如linux服务器被攻击了，我们可以找到对应的ip或ip端加入黑名单。</p>
+
+<p>封掉一个ip：</p>
+
+<pre><code>iptables -I INPUT -s ***.***.***.*** -j DROP
+</code></pre>
+
+<p>解封一个ip：</p>
+
+<pre><code>iptables -D INPUT -s ***.***.***.*** -j DROP
+</code></pre>
+
+<p>清空封掉的ip：</p>
+
+<pre><code>iptables -flush
+</code></pre>
+
+<p>添加IP段到封停列表中：</p>
+
+<pre><code>iptables -I INPUT -s 192.0.0.0/8 -j DROP
+</code></pre>
+
+<p>只允许特定ip访问某端口：</p>
+
+<pre><code>iptables -I INPUT -p TCP –dport 80 -j DROP
+iptables -I INPUT -s 46.166.150.22 -p TCP –dport 80 -j ACCEPT
+</code></pre>
+
+<p>以下是端口，先全部封再开某些的IP</p>
+
+<pre><code>iptables -I INPUT -p tcp –dport 9889 -j DROP
+iptables -I INPUT -s 192.168.1.0/24 -p tcp –dport 9889 -j ACCEPT
+</code></pre>
+
+<p>如果用了NAT转发记得配合以下才能生效</p>
+
+<pre><code>iptables -I FORWARD -p tcp –dport 80 -j DROP
+iptables -I FORWARD -s 192.168.1.0/24 -p tcp –dport 80 -j ACCEPT
+</code></pre>
+
+<p>只能收发邮件，别的都关闭</p>
+
+<pre><code>iptables -I Filter -m mac –mac-source 00:0F:EA:25:51:37 -j DROP
+iptables -I Filter -m mac –mac-source 00:0F:EA:25:51:37 -p udp –dport 53 -j ACCEPT
+iptables -I Filter -m mac –mac-source 00:0F:EA:25:51:37 -p tcp –dport 25 -j ACCEPT
+iptables -I Filter -m mac –mac-source 00:0F:EA:25:51:37 -p tcp –dport 110 -j ACCEPT
+</code></pre>
+
+<p>IPSEC NAT 策略</p>
+
+<pre><code>iptables -I PFWanPriv -d 192.168.100.2 -j ACCEPT
+iptables -t nat -A PREROUTING -p tcp –dport 80 -d $INTERNET_ADDR -j DNAT –to-destination 192.168.100.2:80
+ 
+iptables -t nat -A PREROUTING -p tcp –dport 1723 -d $INTERNET_ADDR -j DNAT –to-destination 192.168.100.2:1723
+ 
+iptables -t nat -A PREROUTING -p udp –dport 1723 -d $INTERNET_ADDR -j DNAT –to-destination 192.168.100.2:1723
+ 
+iptables -t nat -A PREROUTING -p udp –dport 500 -d $INTERNET_ADDR -j DNAT –to-destination 192.168.100.2:500
+ 
+iptables -t nat -A PREROUTING -p udp –dport 4500 -d $INTERNET_ADDR -j DNAT –to-destination 192.168.100.2:4500
+</code></pre>
+
+<p>FTP服务器的NAT</p>
+
+<pre><code>iptables -I PFWanPriv -p tcp –dport 21 -d 192.168.1.22 -j ACCEPT
+iptables -t nat -A PREROUTING -p tcp –dport 21 -d $INTERNET_ADDR -j DNAT –to-destination 192.168.1.22:21
+只允许访问指定网址
+
+iptables -A Filter -p udp –dport 53 -j ACCEPT
+iptables -A Filter -p tcp –dport 53 -j ACCEPT
+iptables -A Filter -d www.ctohome.com -j ACCEPT
+iptables -A Filter -d www.guowaivps.com -j ACCEPT
+iptables -A Filter -j DROP
+</code></pre>
+
+<p>开放一个IP的一些端口，其它都封闭</p>
+
+<pre><code>iptables -A Filter -p tcp –dport 80 -s 192.168.1.22 -d www.pconline.com.cn -j ACCEPT
+iptables -A Filter -p tcp –dport 25 -s 192.168.1.22 -j ACCEPT
+iptables -A Filter -p tcp –dport 109 -s 192.168.1.22 -j ACCEPT
+iptables -A Filter -p tcp –dport 110 -s 192.168.1.22 -j ACCEPT
+iptables -A Filter -p tcp –dport 53 -j ACCEPT
+iptables -A Filter -p udp –dport 53 -j ACCEPT
+iptables -A Filter -j DROP
+</code></pre>
+
+<p>多个端口</p>
+
+<pre><code>iptables -A Filter -p tcp -m multiport –destination-port 22,53,80,110 -s 192.168.20.3 -j REJECT
+</code></pre>
+
+<p>连续端口</p>
+
+<pre><code>iptables -A Filter -p tcp -m multiport –source-port 22,53,80,110 -s 192.168.20.3 -j REJECT iptables -A Filter -p tcp –source-port 2:80 -s 192.168.20.3 -j REJECT
+</code></pre>
+
+<p>指定时间上网</p>
+
+<pre><code>iptables -A Filter -s 10.10.10.253 -m time –timestart 6:00 –timestop 11:00 –days Mon,Tue,Wed,Thu,Fri,Sat,Sun -j DROP
+iptables -A Filter -m time –timestart 12:00 –timestop 13:00 –days Mon,Tue,Wed,Thu,Fri,Sat,Sun -j ACCEPT
+iptables -A Filter -m time –timestart 17:30 –timestop 8:30 –days Mon,Tue,Wed,Thu,Fri,Sat,Sun -j ACCEPT
+</code></pre>
+
+<p>禁止多个端口服务</p>
+
+<pre><code>iptables -A Filter -m multiport -p tcp –dport 21,23,80 -j ACCEPT
+</code></pre>
+
+<p>将WAN 口NAT到PC</p>
+
+<pre><code>iptables -t nat -A PREROUTING -i $INTERNET_IF -d $INTERNET_ADDR -j DNAT –to-destination 192.168.0.1
+</code></pre>
+
+<p>将WAN口8000端口NAT到192。168。100。200的80端口</p>
+
+<pre><code>iptables -t nat -A PREROUTING -p tcp –dport 8000 -d $INTERNET_ADDR -j DNAT –to-destination 192.168.1.22:80
+</code></pre>
+
+<p>MAIL服务器要转的端口</p>
+
+<pre><code>iptables -t nat -A PREROUTING -p tcp –dport 110 -d $INTERNET_ADDR -j DNAT –to-destination 192.168.1.22:110
+iptables -t nat -A PREROUTING -p tcp –dport 25 -d $INTERNET_ADDR -j DNAT –to-destination 192.168.1.22:25
+</code></pre>
+
+<p>只允许PING 202。96。134。133,别的服务都禁止</p>
+
+<pre><code>iptables -A Filter -p icmp -s 192.168.1.22 -d 202.96.134.133 -j ACCEPT
+iptables -A Filter -j DROP
+</code></pre>
+
+<p>禁用BT配置</p>
+
+<pre><code>iptables –A Filter –p tcp –dport 6000:20000 –j DROP
+</code></pre>
+
+<p>禁用QQ防火墙配置</p>
+
+<pre><code>iptables -A Filter -p udp –dport ! 53 -j DROP
+iptables -A Filter -d 218.17.209.0/24 -j DROP
+iptables -A Filter -d 218.18.95.0/24 -j DROP
+iptables -A Filter -d 219.133.40.177 -j DROP
+</code></pre>
+
+<p>基于MAC，只能收发邮件，其它都拒绝</p>
+
+<pre><code>iptables -I Filter -m mac –mac-source 00:0A:EB:97:79:A1 -j DROP
+iptables -I Filter -m mac –mac-source 00:0A:EB:97:79:A1 -p tcp –dport 25 -j ACCEPT
+iptables -I Filter -m mac –mac-source 00:0A:EB:97:79:A1 -p tcp –dport 110 -j ACCEPT
+</code></pre>
+
+<p>禁用MSN配置</p>
+
+<pre><code>iptables -A Filter -p udp –dport 9 -j DROP
+iptables -A Filter -p tcp –dport 1863 -j DROP
+iptables -A Filter -p tcp –dport 80 -d 207.68.178.238 -j DROP
+iptables -A Filter -p tcp –dport 80 -d 207.46.110.0/24 -j DROP
+</code></pre>
+
+<p>只允许PING 202。96。134。133 其它公网IP都不许PING</p>
+
+<pre><code>iptables -A Filter -p icmp -s 192.168.1.22 -d 202.96.134.133 -j ACCEPT
+iptables -A Filter -p icmp -j DROP
+</code></pre>
+
+<p>禁止某个MAC地址访问internet:</p>
+
+<pre><code>iptables -I Filter -m mac –mac-source 00:20:18:8F:72:F8 -j DROP
+</code></pre>
+
+<p>禁止某个IP地址的PING:</p>
+
+<pre><code>iptables –A Filter –p icmp –s 192.168.0.1 –j DROP
+</code></pre>
+
+<p>禁止某个IP地址服务：</p>
+
+<pre><code>iptables –A Filter -p tcp -s 192.168.0.1 –dport 80 -j DROP
+iptables –A Filter -p udp -s 192.168.0.1 –dport 53 -j DROP
+</code></pre>
+
+<p>只允许某些服务，其他都拒绝(2条规则)</p>
+
+<pre><code>iptables -A Filter -p tcp -s 192.168.0.1 –dport 1000 -j ACCEPT
+iptables -A Filter -j DROP
+</code></pre>
+
+<p>禁止某个IP地址的某个端口服务</p>
+
+<pre><code>iptables -A Filter -p tcp -s 10.10.10.253 –dport 80 -j ACCEPT
+iptables -A Filter -p tcp -s 10.10.10.253 –dport 80 -j DROP
+</code></pre>
+
+<p>禁止某个MAC地址的某个端口服务</p>
+
+<pre><code>iptables -I Filter -p tcp -m mac –mac-source 00:20:18:8F:72:F8 –dport 80 -j DROP
+</code></pre>
+
+<p>禁止某个MAC地址访问internet:</p>
+
+<pre><code>iptables -I Filter -m mac –mac-source 00:11:22:33:44:55 -j DROP
+</code></pre>
+
+<p>禁止某个IP地址的PING:</p>
+
+<pre><code>iptables –A Filter –p icmp –s 192.168.0.1 –j DROP
+</code></pre>
+
+<p>参考：</p>
+
+<p><a href="http://xiaozhuang.blog.51cto.com/4396589/874244">1.linux防火墙基础和管理设置iptables规则</a></p>
+
+<p><a href="http://blog.sina.com.cn/s/blog_3eba8f1c0100tsox.html">2.CentOS: 开放80、22、3306端口操作</a></p>
+
+<p><a href="http://yusi123.com/3092.html">3.Linux防火墙：iptables禁IP与解封IP常用命令</a></p>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/operation/2015/09/07/yum-error/" data-toggle="tooltip" data-placement="top" title="yum异常解决方案">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/linux/2015/09/25/error-about-supervisord/" data-toggle="tooltip" data-placement="top" title="supervisord entered FATAL state, too many start retries too quickly错误处理">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#linux基础" title="linux基础" rel="14">
+                                    linux基础
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="20">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#linux服务器" title="linux服务器" rel="10">
+                                    linux服务器
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Mysql" title="Mysql" rel="11">
+                                    Mysql
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#OS System" title="OS System" rel="7">
+                                    OS System
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#python技巧" title="python技巧" rel="21">
+                                    python技巧
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#redis" title="redis" rel="14">
+                                    redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#django" title="django" rel="8">
+                                    django
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#tornado" title="tornado" rel="6">
+                                    tornado
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Shell" title="Shell" rel="7">
+                                    Shell
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#git" title="git" rel="5">
+                                    git
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#web开发" title="web开发" rel="2">
+                                    web开发
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#jQuery" title="jQuery" rel="3">
+                                    jQuery
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#人生" title="人生" rel="4">
+                                    人生
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#备份" title="备份" rel="2">
+                                    备份
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Nginx" title="Nginx" rel="3">
+                                    Nginx
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#windows服务器" title="windows服务器" rel="3">
+                                    windows服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python模块" title="python模块" rel="2">
+                                    python模块
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#运维" title="运维" rel="4">
+                                    运维
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python奇技淫巧" title="python奇技淫巧" rel="4">
+                                    python奇技淫巧
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python" title="python" rel="17">
+                                    python
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Unix网络编程" title="Unix网络编程" rel="7">
+                                    Unix网络编程
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#C" title="C" rel="2">
+                                    C
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#ops" title="ops" rel="3">
+                                    ops
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#book" title="book" rel="4">
+                                    book
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#mongodb" title="mongodb" rel="6">
+                                    mongodb
+                                </a>
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/stevensia">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Steven's Blog 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

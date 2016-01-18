@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="个人技术总结，读书笔记，心得等 | 这里是 Stevensia的个人博客，与君共勉。">
+    <meta name="keyword"  content="Python, Steven的博客, Steven Blog, linux">
+    <link rel="shortcut icon" href="img/favicon.ico">
+
+    <title>python迭代器小结 - Steven's Blog!</title>
+
+    <link rel="canonical" href="http://universus.cn/python/2015/04/09/python-learn10/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Steven's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About me</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/bigshows/coding1.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/bigshows/coding1.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#python技巧" title="python技巧">python技巧</a>
+                        
+                    </div>
+                    <h1>python迭代器小结</h1>
+                    
+                    
+                    <h2 class="subheading"></h2>
+                    
+                    <span class="meta">Posted by Steven's Blog on April 9, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-9 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<p><img src="http://img6.cache.netease.com/video/2012/9/29/20120929164524f8660.jpg" alt="" /></p>
+
+<h2>1.一个简单的例子</h2>
+
+<pre><code>[python]
+i = iter(range(10))  # 内建函数iter 生成迭代器，吃了一堆元素
+&amp;gt;&amp;gt;&amp;gt; i
+&amp;lt;listiterator object at 0xb69aeder&amp;gt;
+&amp;gt;&amp;gt;&amp;gt; i.next()  # 吐出一个
+0
+&amp;gt;&amp;gt;&amp;gt; i.next()  # 又吐出了一个
+1
+..
+&amp;gt;&amp;gt;&amp;gt; list(i)  # 剩下的全部吐出来
+[2, 3, 4, 5, 6, 7, 8, 9]
+
+&amp;gt;&amp;gt;&amp;gt; i.next()  # 胃空空，再吐就吐出肠子了
+Traceback (most recent call last):
+File &amp;quot;&amp;lt;input&amp;gt;&amp;quot;, line 1, in &amp;lt;module&amp;gt;
+StopIteration
+&amp;gt;&amp;gt;&amp;gt; 
+
+&amp;gt;&amp;gt;&amp;gt; r = range(10)  # 全在胃里
+&amp;gt;&amp;gt;&amp;gt; r
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+&amp;gt;&amp;gt;&amp;gt; r.pop()        # 吐掉最后一个
+9
+&amp;gt;&amp;gt;&amp;gt; r.pop()        # 吐掉最后一个
+8
+&amp;gt;&amp;gt;&amp;gt; r.pop()
+7
+&amp;gt;&amp;gt;&amp;gt; r
+[0, 1, 2, 3, 4, 5, 6]
+[/python]
+</code></pre>
+
+<!--more-->
+
+<p>从上面代码可以看出，迭代器属于一个临时区，安排一些元素在里面，但只用用的时候才会创建一些临时区，一旦遍历结束则临时区清空，再遍历就失效了。所以说迭代器能够减少内存的开销，只用用的时候才会创建，而且是一块一块的，就如上传视频，可以一段一段上传，也可以整个一下子都上传，而迭代器就属于一段一段的。可以看看它的内存占用：</p>
+
+<pre><code>&gt;&gt;&gt; import sys
+&gt;&gt;&gt; i = iter(range(1000000))
+&gt;&gt;&gt; sys.getsizeof(i)
+28
+
+&gt;&gt;&gt; r = range(1000000) # 全部塞入内存中
+&gt;&gt;&gt; sys.getsizeof(r)
+4000032
+</code></pre>
+
+<p><strong>这是改善Python性能的一个知识点，对于大数据如几个G的数据最好采用迭代器。</strong>，这种方式叫<strong>惰性计算</strong>。</p>
+
+<h2>2迭代器简介</h2>
+
+<p>从wiki中引述：</p>
+
+<blockquote>
+  <p>迭代器（iterator）有时又称游标（cursor）是<strong>程式设计的软件设计模式</strong>，可在容器物件（container，例如链表或阵列）上遍访的<strong>接口</strong>，设计人员无需关心容器物件的内存分配的实现细节。</p>
+  
+  <p>各种语言实作迭代器的方式皆不尽同，有些面向对象语言像<strong>Java, C#, Ruby, Python, Delphi都已将迭代器的特性内建语言当中，完美的跟语言整合，我们称之隐式迭代器（implicit iterator）</strong>，但像是C++语言本身就没有迭代器的特色。</p>
+</blockquote>
+
+<p><strong>概述：</strong>从上面例子和wiki可分析出，迭代器就是访问集合元素，一种惰性加载元素的方式。<strong>从根本上说，迭代器就是有一个next()方法的对象，而不是通过索引来计数的</strong>。</p>
+
+<h2>3. 迭代器的创建</h2>
+
+<p>在 Python 中，迭代器是遵循迭代协议的对象。使用 iter() 从任何序列对象中得到迭代器（如 list, tuple, dictionary, set 等）。另一种形式的输入迭代器是generator 。</p>
+
+<h4>方式1 内置函数<code>iter()</code></h4>
+
+<pre><code>with open('mydata.txt') as fp:
+    for line in iter(fp.readline, ''):
+        process_line(line)
+</code></pre>
+
+<p><code>iter()</code>语法在这里:<a href="https://docs.python.org/2/library/functions.html#iter">https://docs.python.org/2/library/functions.html#iter</a>,它接收支持迭代协议(实现了<code>__iter__()</code>方法)的collection对象和序列协议（实现了<code>__getitem__()</code>方法）。它返回迭代对象，iter(迭代对象)返回的还是它本身。如：</p>
+
+<pre><code>i = iter(range(10))
+ii = iter(i)
+&gt;&gt;&gt; i is ii
+True
+</code></pre>
+
+<p>对于迭代器<strong>比较规范的写法</strong>：</p>
+
+<pre><code># 從序列得到
+x = [42, "test", -12.34]
+it = iter(x)
+try:
+  while True:
+    x = next(it) # 在 Python 2 中，要改成 it.next()
+    print(x)
+except StopIteration:
+  pass
+</code></pre>
+
+<h4>方式2.生成器获取</h4>
+
+<pre><code>&gt;&gt;&gt; l = (i for i in range(10))
+&gt;&gt;&gt; l
+&lt;generator object &lt;genexpr&gt; at 0xb699c11c&gt;
+&gt;&gt;&gt; try:
+...     while 1:       # while 1 性能要比 while True好
+...         x = l.next()  # python3 写成： next(l)
+...         print x
+... except StopIteration:
+...     pass
+</code></pre>
+
+<h2>4. 迭代器 Vs for</h2>
+
+<p>如下代码：</p>
+
+<pre><code>&gt;&gt;&gt; i = iter(range(3))    # 迭代器
+&gt;&gt;&gt; l = range(3)          # 可迭代对象
+&gt;&gt;&gt; for j in i: print j
+... 
+0
+1
+2
+&gt;&gt;&gt; for j in l: print j
+... 
+0
+
+&gt;&gt;&gt; try:
+...     while 1:
+...         print i.next()
+... except StopIteration:
+...     pass
+... 
+</code></pre>
+
+<p><strong>for 是对获取迭代器，调用next()方法和处理StopIteration异常的封装，是迭代器提供的语法糖</strong>,对于<code>for</code>循环中，用于迭代器检查是否是迭代对象，如果是则循环遍历输出；如果不是则检查是否是可迭代对象，如是则隐式调用<code>iter()</code>实现迭代对象，然后调用next()方法遍历所有元素，知道触发<code>StopIteration</code>异常，就表示遍历完成了。</p>
+
+<h2>5. 迭代器vs索引</h2>
+
+<p>从上面的学习知道，迭代器是不支持索引的，原因就是索引需实现明元素确占用的内存地址，而迭代器是用到元素的时候才会创建。如下：</p>
+
+<pre><code>&gt;&gt;&gt; i = iter(range(3))    # 创建迭代器
+&gt;&gt;&gt; i.index(2)            # 获取元素为2的索引
+Traceback (most recent call last):  # 触发异常
+  File "&lt;input&gt;", line 1, in &lt;module&gt;
+AttributeError: 'listiterator' object has no attribute 'index'
+
+#列表
+&gt;&gt;&gt; l = range(3)
+&gt;&gt;&gt; l.index(2)  # 获取索引
+2     
+</code></pre>
+
+<p>这个时候可以使用内建函数<code>enumerate()</code></p>
+
+<pre><code>enumerate(iterable[, start]) -&gt; iterator for index, value of iterable
+</code></pre>
+
+<p>使用：</p>
+
+<pre><code>&gt;&gt;&gt; for i,j in enumerate(iter(['A', 'B', 'C'])):  # 或 enumerate(['A', 'B', 'C'])
+...     print i,j
+...     
+... 
+0 A
+1 B
+2 C
+</code></pre>
+
+<h2>6.迭代协议</h2>
+
+<p>迭代协议并不是Python约定俗成的协议，以下参考《改善Python程序的91个建议》：</p>
+
+<blockquote>
+  <p>1.实现<code>__iter__()</code>方法，返回一个迭代器</p>
+  
+  <p>2.实现<code>next()</code>方法迭代，抛出<code>StopIteration</code>异常</p>
+</blockquote>
+
+<pre><code>&gt;&gt;&gt; s = ['A', 'B', 'C']
+&gt;&gt;&gt; i = s.__iter__()          # container.__iter__() 返回iterator对象，如iterator本身则返回本身。
+&gt;&gt;&gt; i
+&lt;listiterator object at 0xb69cd2cc&gt;
+&gt;&gt;&gt; i.next()
+'A'
+&gt;&gt;&gt; 
+</code></pre>
+
+<h2>6.迭代器的优缺点</h2>
+
+<p><strong>优点</strong>：节省内存（惰性求值）开销；提供统一容器访问接口；比较适合大的数据或无穷尽的需求。如斐波那契函数：</p>
+
+<pre><code>#!/usr/bin/env python
+# coding=utf-8
+class Fib(object):
+    def __init__(self):
+        self.a = 0
+        self.b = 1
+    def __iter__(self):    # 调用__iter__()函数返回迭代对象，这里返回它自身。
+        return self
+    def next(self):        # 定义next()方法
+        self.a, self.b = self.b, self.a+self.b
+        return self.a
+
+f = Fib()
+print f.next()  # 1
+print f.next()  # 1
+print f.next()  # 2
+for i, j in enumerate(f):
+    print j
+    if i &gt; 10: break
+</code></pre>
+
+<p><strong>缺点</strong>：不能回退（不能算是缺点，因为回退是没有意义的）；迭代器也不是线程安全的，在多线程环境中对可变集合使用迭代器是一个危险的操作。但如果小心谨慎，或者干脆贯彻函数式思想坚持使用不可变的集合，那这也不是什么大问题。</p>
+
+<h2>7.itertools模块</h2>
+
+<p>itertools是python提供的非常高效创建与使用迭代器的模块，<strong>注意：利用itertools模块能够提高Python性能</strong>。如：</p>
+
+<pre><code>&gt;&gt;&gt; from itertools import chain
+&gt;&gt;&gt; test = chain.from_iterable('ABCDEFG')
+&gt;&gt;&gt; test.next()
+'A'
+&gt;&gt;&gt; test.next()
+'B'
+&gt;&gt;&gt; test.next()
+'C'
+&gt;&gt;&gt; test2 = chain('AB', 'CDE', 'F')
+&gt;&gt;&gt; list(test2)
+['A', 'B', 'C', 'D', 'E', 'F']
+</code></pre>
+
+<p>更多参考：<a href="http://www.cnblogs.com/cython/articles/2169009.html">Python：itertools模块</a></p>
+
+<h2>8.参考</h2>
+
+<p>1.<a href="http://www.cnblogs.com/huxi/archive/2011/07/01/2095931.html">Python函数式编程指南（三）：迭代器</a></p>
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/python/2015/04/09/python-if-else/" data-toggle="tooltip" data-placement="top" title="python if else 多种写法">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/python/2015/04/09/python-list-sort/" data-toggle="tooltip" data-placement="top" title="python list 排序">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#linux基础" title="linux基础" rel="14">
+                                    linux基础
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="20">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#linux服务器" title="linux服务器" rel="10">
+                                    linux服务器
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Mysql" title="Mysql" rel="11">
+                                    Mysql
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#OS System" title="OS System" rel="7">
+                                    OS System
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#python技巧" title="python技巧" rel="21">
+                                    python技巧
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#redis" title="redis" rel="14">
+                                    redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#django" title="django" rel="8">
+                                    django
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#tornado" title="tornado" rel="6">
+                                    tornado
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Shell" title="Shell" rel="7">
+                                    Shell
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#git" title="git" rel="5">
+                                    git
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#web开发" title="web开发" rel="2">
+                                    web开发
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#jQuery" title="jQuery" rel="3">
+                                    jQuery
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#人生" title="人生" rel="4">
+                                    人生
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#备份" title="备份" rel="2">
+                                    备份
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Nginx" title="Nginx" rel="3">
+                                    Nginx
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#windows服务器" title="windows服务器" rel="3">
+                                    windows服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python模块" title="python模块" rel="2">
+                                    python模块
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#运维" title="运维" rel="4">
+                                    运维
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python奇技淫巧" title="python奇技淫巧" rel="4">
+                                    python奇技淫巧
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python" title="python" rel="17">
+                                    python
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Unix网络编程" title="Unix网络编程" rel="7">
+                                    Unix网络编程
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#C" title="C" rel="2">
+                                    C
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#ops" title="ops" rel="3">
+                                    ops
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#book" title="book" rel="4">
+                                    book
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#mongodb" title="mongodb" rel="6">
+                                    mongodb
+                                </a>
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/stevensia">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Steven's Blog 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

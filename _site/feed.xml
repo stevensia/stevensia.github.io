@@ -1,0 +1,1823 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Steven&#39;s Blog</title>
+    <description>个人技术总结，读书笔记，心得等 | 这里是 Stevensia的个人博客，与君共勉。</description>
+    <link>http://universus.cn/</link>
+    <atom:link href="http://universus.cn/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Mon, 18 Jan 2016 21:26:00 +0800</pubDate>
+    <lastBuildDate>Mon, 18 Jan 2016 21:26:00 +0800</lastBuildDate>
+    <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>Writing-an-API-with-Tornado</title>
+        <description>&lt;p&gt;Tornado is a Python web framework and asynchronous networking library originally developed at FriendFeed. By using non-blocking network I/O, Tornado can scale to tens of thousands of open connections. Some of the APIs we provide take some time to process so we take advantage of Tornado’s scalability and non-blocking I/O to support these longer user connections.&lt;/p&gt;
+
+&lt;p&gt;** Overview:**&lt;/p&gt;
+
+&lt;p&gt;with Python (2.7) and pip;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Top-level directory&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;setup.py -&amp;gt; python setup.py develop -&amp;gt; installs the package and requirements that are necessary to run the server.
+req.txt -&amp;gt; dependencies list
+setup.cfg -&amp;gt; nosetests -&amp;gt; runs the test suite for the package
+yourapp -&amp;gt; package for the server
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The project &lt;a href=&quot;https://github.com/sihrc/tornado-boilerplate&quot;&gt;Boilerplate code for a Tornado API Server https://indico.io&lt;/a&gt; building Python + Tornado + Motor (MongoDb)&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Modules:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Let’s go over the modules that are in the package.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db -&amp;gt; database helper functions for each individual database table / collection
+error -&amp;gt; custom errors for error handling and sending appropriate server responses
+routes -&amp;gt; handlers that specify routing logic for the server. most of the server logic is here.
+tests -&amp;gt; unittest tests
+utils -&amp;gt; utilities that make lives easier (more later)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Running the Server:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;To run the server, run the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ python -m yourapp.server
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Additional configs are in config.py — right now, it simply has a specified port and MongoDB URI.&lt;/p&gt;
+
+&lt;p&gt;More in &lt;a href=&quot;https://github.com/BeginMan/tornado-boilerplate&quot;&gt;&lt;strong&gt;tornado-boilerplate&lt;/strong&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;ref:&lt;a href=&quot;https://indico.io/blog/writing-an-api-with-tornado/&quot;&gt;Writing an API with Tornado&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;整理完善中~&lt;/p&gt;
+</description>
+        <pubDate>Mon, 18 Jan 2016 00:00:00 +0800</pubDate>
+        <link>http://universus.cn/tornado/2016/01/18/Writing-an-API-with-Tornado/</link>
+        <guid isPermaLink="true">http://universus.cn/tornado/2016/01/18/Writing-an-API-with-Tornado/</guid>
+        
+        <category>tornado</category>
+        
+        
+        <category>tornado</category>
+        
+      </item>
+    
+      <item>
+        <title>Mongodb设计与优化</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;多看优秀的代码，参与开源项目才能更快的提升自己！&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;一.应用程序设计&lt;/h1&gt;
+&lt;p&gt;在关系型数据库中特别强调的是&lt;strong&gt;范式&lt;/strong&gt;, 之前看慕课网《数据库设计那些事》教学视频，总结了一篇文章&lt;a href=&quot;http://beginman.cn/mysql/2015/05/30/db-desigin/&quot;&gt;&lt;strong&gt;数据库设计小结&lt;/strong&gt;&lt;/a&gt;来说明关系型数据库设计步骤与规范。奈何没有这个学习和实践的环境，导致现在我的mysql技能还是马马虎虎的，想想都头疼。&lt;/p&gt;
+
+&lt;p&gt;在mongodb中也有范式与反范式，一般就是&lt;strong&gt;内嵌数据和引用数据&lt;/strong&gt;的比较，其指导原则如下：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;更适合内嵌&lt;/th&gt;
+      &lt;th&gt;更适合引用&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;子文档较小&lt;/td&gt;
+      &lt;td&gt;子文档较大&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;数据变动少&lt;/td&gt;
+      &lt;td&gt;数据变动多&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;最终数据一致即可&lt;/td&gt;
+      &lt;td&gt;中间阶段的数据必须一致&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;文档数据小幅度增加&lt;/td&gt;
+      &lt;td&gt;文档数据大幅度增加&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;快速读取&lt;/td&gt;
+      &lt;td&gt;快速写入&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;关于引用，则一个集合中包含对其他集合的引用数量叫&lt;strong&gt;基数(cardinality)&lt;/strong&gt;,如一对一，一对多，多对多，但是只要确定这多与少的关系，就容易在内嵌和引用之前权衡，如“少”则内嵌，无需引用，“多”则引用。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;对于删除旧数据的设计，如特定时间删除数据，常用的设计方案有：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;固定集合： 设定集合大小，当集合fulled则旧数据挤出，但在大量插入会降低数据在固定集合内的存活期&lt;/li&gt;
+  &lt;li&gt;TTL集合： 对于大量写入则不够快，因为它遍历TTL索引来删除文档&lt;/li&gt;
+  &lt;li&gt;指定多个集合： 如月集合，年集合等设定为临时集合，可能需要一个中间介质如shell脚本，在指定时间后删除该集合。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;上述各有利弊，如果针对日志，我建议还是使用固定集合。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;不适合mongodb的场景&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;不支持事务，如果应用程序对事务有要求则不要使用mongodb&lt;/li&gt;
+  &lt;li&gt;对不同数据库连接操作则不要使用mongodb,因为mongo不支持这样跨数据库操作&lt;/li&gt;
+  &lt;li&gt;复杂SQL查询的问题不要使用mongodb,最好还是关系型数据库&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;适用场景&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;网站数据：mongo非常适合实时的插入，更新与查询，并具备网站实时数据存储所需的复制及高度伸缩性。&lt;/li&gt;
+  &lt;li&gt;缓存：由于性能很高，mongo也适合作为信息基础设施的缓存层。在系统重启之后，由mongo搭建的持久化缓存可以避免下层的数据源过载。&lt;/li&gt;
+  &lt;li&gt;大尺寸、低价值的数据：使用传统的关系数据库存储一些数据时可能会比较贵，在此之前，很多程序员往往会选择传统的文件进行存储。&lt;/li&gt;
+  &lt;li&gt;高伸缩性的场景：mongo非常适合由数十或者数百台服务器组成的数据库。&lt;/li&gt;
+  &lt;li&gt;用于对象及JSON数据的存储：mongo的BSON数据格式非常适合文档格式化的存储及查询。&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+        <pubDate>Sun, 17 Jan 2016 00:00:00 +0800</pubDate>
+        <link>http://universus.cn/mongodb/2016/01/17/mongo-optimization/</link>
+        <guid isPermaLink="true">http://universus.cn/mongodb/2016/01/17/mongo-optimization/</guid>
+        
+        <category>mongodb</category>
+        
+        
+        <category>mongodb</category>
+        
+      </item>
+    
+      <item>
+        <title>冷静的想想，现在应该做什么</title>
+        <description>
+&lt;p&gt;最近事情很多，python零零碎碎的学习了一些东西，scrapy也是东挪西凑写了点东西抓两个网站，但是似乎这两天才搞明白Selector，也才明白这并不是我想要的，或者说我开始以为Scrapy能干的事和我想象的不一样，需要重新思考一下。&lt;/p&gt;
+
+&lt;p&gt;Scrapy的Selector是一个选择器，用scrapy发出一个请求后，Seletor就已经产生了，不管你用不用，它就在那里。那么我们能用它干嘛呢？&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;内建两个重要的方法，xpath &amp;amp; css  &lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;内建正则表达式Re  &lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;内建extact返回Selector对象列表，当然也可以返回字符串  &lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;但是我们用到最多的就是xpath方法了，开始我只是简单的看了一下语法，发现处理html确实很方便，于是东拼西凑的整了两个礼拜，最后我明白了，这玩意是很好用，但是有个巨大的缺陷，那就是它只能处理一组类似的元素或者属性,不能顺序处理。这是个坑爹的地方，因为很多时候我需要顺序处理，条件判断，然后获取我想要的内容，可是尼玛这是啥玩意，难道是我了解的太浅，实际上它也是能顺序处理的？&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;好吧，言归正传，我到底要干嘛？&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;其实xpath这个功能已经是够够的了，不管是抓取部分数据，还是顺序处理，难道就不能获取HTML片段后再局部处理嘛？脑袋要灵活点，不能浪费时间了！&lt;/p&gt;
+
+&lt;p&gt;所以问题的关键还是回到这里：我需要干嘛！&lt;/p&gt;
+
+&lt;p&gt;其实我的初衷很简单，了解爬虫技术，在产生这个初衷之前我不是很了解爬虫这个概念本身最常用的功能是干嘛的，所以可能xpath这种是很准确的满足了爬虫的要求：获取部分数据，获取某个数值，例如标题，价格等数据，简单说，数据挖掘？&lt;/p&gt;
+
+&lt;p&gt;好吧，我真的很菜：（&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;那么我现在需要干嘛呢？&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;目前被卡住的： &lt;br /&gt;
+1. liao网站没处理完，其中文字部分完美拿下，但是标题部分需要稍微处理一下，生成顺序标题。  &lt;br /&gt;
+2. sammy网站还处在混乱中，问题在于其中包含大量图片以及推荐链接，思路如下:  &lt;/p&gt;
+
+&lt;p&gt;顺序处理post_detail部分html代码，遇到img，下载，保存到指定目录，文档中加入图片链接；&lt;br /&gt;
+  文字链接部分，如果带有a属性，用[]加入链接指示。&lt;/p&gt;
+
+&lt;p&gt;前提都是要顺序处理，基本上xpath要被抛弃，没办法，我这是整站搬迁。。。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;那这是我不是我现在应该干的事呢？&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;好像也不是！最近python也学了快一个月了，只是进步不大，收获甚微。原因还是自己太过浮躁，一些基本问题没有弄明白，就急于求成的去平凑代码写程序，怎不知万丈高楼平地起，咱还是应该慢慢来啊。&lt;/p&gt;
+
+&lt;p&gt;抽根烟去，回来好好反省。&lt;/p&gt;
+
+&lt;p&gt;SMOKING…SMOKING..&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Here we go!&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;既然xpath最适合抓取特定数据，那么咱们就来做这些事，有几个我想过的： &lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;特定内容类网站的文章列表  &lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;微信公众号排名top50  &lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;监测JD/AMAZON/TMALL某商品价格列表变动，并生成价格变化曲线  &lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+</description>
+        <pubDate>Thu, 14 Jan 2016 16:22:02 +0800</pubDate>
+        <link>http://universus.cn/python/2016/01/14/thinking/</link>
+        <guid isPermaLink="true">http://universus.cn/python/2016/01/14/thinking/</guid>
+        
+        <category>思考</category>
+        
+        
+        <category>python</category>
+        
+      </item>
+    
+      <item>
+        <title>Python 位操作</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;位操作是程序设计中对位模式按位，或二进制数的一元和二元操作。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;计算机里面所有数据都存储为0，1串，所有的运算归根到底都转为二进制数的运算。&lt;/p&gt;
+
+&lt;p&gt;##一.位操作 #&lt;br /&gt;
+aaa&lt;br /&gt;
+&lt;strong&gt;位操作是程序设计中对位模式按位，或二进制数的一元和二元操作。&lt;/strong&gt;, 首先有必要看看&lt;a href=&quot;https://zh.wikipedia.org/wiki/%E4%BD%8D%E6%93%8D%E4%BD%9C&quot;&gt;wiki 位操作&lt;/a&gt; 来复习一下。&lt;/p&gt;
+
+&lt;p&gt;位运算符有：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;取反(NOT):	一元操作，对二进制每位执行逻辑反，1-&amp;gt;0, 0-&amp;gt;1, 值得注意的是此操作符与”逻辑非（!）”操作符不同&lt;/li&gt;
+  &lt;li&gt;按位或(OR): 按位或处理两个长度相同的二进制数，两个相应的二进位中只要有一个为1，该位的结果值为1&lt;/li&gt;
+  &lt;li&gt;按位异或（XOR): 对等长二进制模式按位，或二进制数的每一位执行逻辑异按位或操作。操作的结果是如果某位不同则该位为1，否则该位为0&lt;/li&gt;
+  &lt;li&gt;按位与（AND）：处理两个长度相同的二进制数，两个相应的二进位都为1，该位的结果值才为1，否则为0&lt;/li&gt;
+  &lt;li&gt;移位：将一个二进制数中的每一位全部都向一个方向移动指定位，溢出的部分将被舍弃，而空缺的部分填入一定的值。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://segmentfault.com/img/bVp6Uv&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;如下例子：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; 0b1010 &amp;amp; 0b1100
+8   #1000
+&amp;gt;&amp;gt;&amp;gt; 0b1010 | 0b1100
+14  #1110
+&amp;gt;&amp;gt;&amp;gt; 0b1010 ^ 0b1100
+6   #0110
+&amp;gt;&amp;gt;&amp;gt; 0b1010 &amp;lt;&amp;lt; 2
+40  #101000
+&amp;gt;&amp;gt;&amp;gt; 0b1010 &amp;gt;&amp;gt; 2
+2   #10
+&amp;gt;&amp;gt;&amp;gt; ~0b1010
+-11 #10000000 00000000 00000000 00001011
+&amp;gt;&amp;gt;&amp;gt; type(0b1010)
+&amp;lt;type &#39;int&#39;&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;上面&lt;code&gt;0b&lt;/code&gt;开头的0、1串表示整型数字，在32位操作系统中，Python中int类型一般占32个二进制位，以最后一个求反运算为例子，1010的补码为00000000 00000000 00000000 00001010&lt;/p&gt;
+
+&lt;h3 id=&quot;section&quot;&gt;二.原码，补码，反码，移码&lt;/h3&gt;
+
+&lt;p&gt;计算机中对数字的表示有三种方式：原码，反码，补码，计算机的硬件结构中&lt;strong&gt;只有加法器&lt;/strong&gt;，所以大部分的运算都必须最终转换为加法，按位运算就把数字转换为机器语言，二进制的数字来运算的一种运算形式。在计算机系统中，&lt;strong&gt;数值一律用补码来表示(存储)。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;推荐阅读：&lt;a href=&quot;http://www.cnblogs.com/zhangziqiu/archive/2011/03/30/computercode.html&quot;&gt;&lt;strong&gt;原码, 反码, 补码 详解&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;原码是指一个二进制数左边加上符号位后所得到的码，且当二进制数大于0时，符号位为0；二进制数小于0时，符号位为1；二进制数等于0时，符号位可以为0或1(+0/-0)。&lt;/li&gt;
+  &lt;li&gt;反码表示法规定：正数的反码是其本身；负数的反码是在其原码的基础上，符号位不变，其余各个位取反。&lt;/li&gt;
+  &lt;li&gt;补码：正数的补码是其本身；负数的补码是在其原码的基础上，符号位不变，其余各位取反，最后+1。 (即在反码的基础上+1)。&lt;/li&gt;
+  &lt;li&gt;移码:是符号位取反的补码，一般用做浮点数的阶码，引入的目的是为了保证浮点数的机器零为全0。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20140504195529828?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvd2xjY29tZW9u/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;计算机中数字存储为补码形式，各个数之间的运算也是对它们的补码做运算，而且得到的结果也是补码，如下图：&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://segmentfault.com/img/bVp6Ux&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;python&quot;&gt;三.Python按位操作&lt;/h1&gt;
+
+&lt;p&gt;前面概念性的东西看了一遍，大致了解，下面用python来实现。&lt;/p&gt;
+
+&lt;p&gt;Python中的按位运算符有：左移运算符（&lt;code&gt;&amp;lt;&amp;lt;&lt;/code&gt;），右移运算符（&lt;code&gt;&amp;gt;&amp;gt;&lt;/code&gt;）,按位与（&lt;code&gt;&amp;amp;&lt;/code&gt;），按位或（&lt;code&gt;|&lt;/code&gt;），取反（&lt;code&gt;～&lt;/code&gt;）。这些运算符中只有取反是单目运算符，其他的都是双目运算符。&lt;/p&gt;
+
+&lt;p&gt;参考&lt;a href=&quot;http://stackoverflow.com/questions/1746613/bitwise-operation-and-usage&quot;&gt;Bitwise operation and usage&lt;/a&gt;测试例子可以总结：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;AND&lt;/code&gt; is 1 only if both of its inputs are 1, otherwise it’s 0.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;OR&lt;/code&gt; is 1 if one or both of its inputs are 1, otherwise it’s 0.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;XOR&lt;/code&gt; is 1 only if exactly one of its inputs are 1, otherwise it’s 0.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;NOT&lt;/code&gt; is 1 only if its input is 0, otherwise it’s 0.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;eg:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;AND | 0 1     OR | 0 1     XOR | 0 1    NOT | 0 1
+----+-----    ---+----     ----+----    ----+----
+ 0  | 0 0      0 | 0 1       0 | 0 1        | 1 0
+ 1  | 0 1      1 | 1 1       1 | 1 0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;section-1&quot;&gt;3.1 判断奇偶&lt;/h2&gt;
+
+&lt;p&gt;&lt;code&gt;num &amp;amp; 0x1&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; 13&amp;amp;0b1
+1
+&amp;gt;&amp;gt;&amp;gt; 10&amp;amp;0b1
+0
+&amp;gt;&amp;gt;&amp;gt; 10&amp;amp;0x1
+0
+&amp;gt;&amp;gt;&amp;gt; 13&amp;amp;0x1
+1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;3.2 数字互换&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; def swap(n1, n2):
+...     n1 ^= n2
+...     n2 ^= n1
+...     n1 ^= n2
+...     return n1, n2
+... 
+&amp;gt;&amp;gt;&amp;gt; swap(1, 3)
+(3, 1)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;推荐阅读清单：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://blog.csdn.net/morewindows/article/details/7354571&quot;&gt;位操作基础篇之位操作全面总结&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://blog.csdn.net/morewindows/article/details/8214003&quot;&gt;【白话经典算法系列之十二】数组中只出现1次的两个数字(百度面试题)&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://segmentfault.com/a/1190000003789802&quot;&gt;你不知道的按位运算&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+        <pubDate>Tue, 12 Jan 2016 00:00:00 +0800</pubDate>
+        <link>http://universus.cn/python/2016/01/12/python-bit-manipulation/</link>
+        <guid isPermaLink="true">http://universus.cn/python/2016/01/12/python-bit-manipulation/</guid>
+        
+        <category>python</category>
+        
+        
+        <category>python</category>
+        
+      </item>
+    
+      <item>
+        <title>Python迭代器和生成器</title>
+        <description>&lt;p&gt;重点：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;理解迭代原理&lt;/li&gt;
+  &lt;li&gt;理解生成器原理，yield使用方法&lt;/li&gt;
+  &lt;li&gt;itertools模块的掌握&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;一.迭代协议&lt;/h1&gt;
+
+&lt;p&gt;我们常用 forloop 用来遍历一个可迭代对象,如果需要对迭代做更加精准的控制，必须要了解底层迭代机制。&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;调用&lt;code&gt;iter(items)&lt;/code&gt;或&lt;code&gt;items.__iter__()&lt;/code&gt;来获取iterator。&lt;/li&gt;
+  &lt;li&gt;使用&lt;code&gt;next()&lt;/code&gt; 或 &lt;code&gt;it.__next__()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;StopIteration&lt;/code&gt; 用来指示迭代的结尾&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;如下测试，手动遍历可迭代对象,&lt;a href=&quot;https://github.com/BeginMan/pytool/blob/master/iterator_and_generators/manual_iter.py&quot;&gt;manual_iter.py&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;在任何可迭代对象中执行迭代操作只需要定义一个 &lt;strong&gt;iter&lt;/strong&gt;() 方法，将迭代操作代理到容器内部的对象上去.&lt;/p&gt;
+
+&lt;p&gt;如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class Node(object):
+    def __init__(self, name):
+        self.name = name
+        self._children = []
+
+    def __repr__(self):
+        return &#39;&amp;lt;Node: %r&amp;gt;&#39; % self.name
+
+    def __iter__(self):
+        # 将迭代请求传递给内部的 _children 属性。
+        return iter(self._children)
+
+    def __add__(self, other):
+        self._children.append(other)
+
+
+root = Node(&#39;root&#39;)
+child_a = Node(&#39;a&#39;)
+child_b = Node(&#39;b&#39;)
+root + child_a
+root + child_b
+
+for obj in root:
+    print obj
+
+
+# outputs:
+# &amp;lt;Node: &#39;a&#39;&amp;gt;
+# &amp;lt;Node: &#39;b&#39;&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;迭代器协议需要&lt;code&gt;__iter__()&lt;/code&gt;方法实现一个&lt;code&gt;__next__()&lt;/code&gt;方法的迭代器对象。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;如果你只是迭代遍历其他容器的内容，你无须担心底层是怎样实现的。你所要做的只是传递迭代请求既可。&lt;/p&gt;
+
+&lt;p&gt;这里&lt;code&gt;iter(s)&lt;/code&gt; 只是简单的通过调用 &lt;code&gt;s.__iter__()&lt;/code&gt; 方法来返回对应的迭代器对象。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-1&quot;&gt;二. 自定义迭代模式&lt;/h1&gt;
+&lt;p&gt;如果你想实现一种新的迭代模式，使用一个生成器函数来定义它,通过&lt;code&gt;yield&lt;/code&gt;语句来实现。&lt;/p&gt;
+
+&lt;h2 id=&quot;yield&quot;&gt;2.1 yield原理&lt;/h2&gt;
+
+&lt;p&gt;关于yield,这篇文章很好&lt;a href=&quot;http://pyzh.readthedocs.org/en/latest/the-python-yield-keyword-explained.html&quot;&gt; &lt;strong&gt;(译)Python关键字yield的解释(stackoverflow)¶&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;2.2 自定义一个高效的反向迭代&lt;/h2&gt;
+&lt;p&gt;使用内置的 &lt;code&gt;reversed()&lt;/code&gt; 函数,往往需要将对象转换为一个列表，可迭代对象元素很多的话，转换为一个列表要&lt;strong&gt;消耗大量的内存&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;如何生成一个高效的反向迭代呢？我们可以**自定义类上实现 &lt;code&gt;__reversed__()&lt;/code&gt; 方法来实现反向迭代,如实例&lt;a href=&quot;https://github.com/BeginMan/pytool/blob/master/iterator_and_generators/iterating_in_reverse.py&quot;&gt;iterating_in_reverse.py&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-3&quot;&gt;2.3 迭代器和生成器通用切片&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;迭代器和生成器不能使用标准的切片操作，因为它们的长度事先我们并不知道(并且也没有实现索引)。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; def count(n):
+...     while n &amp;gt; 0:
+...             yield n
+...             n -= 1
+... 
+&amp;gt;&amp;gt;&amp;gt; n = count(10)
+&amp;gt;&amp;gt;&amp;gt; n[2: 5]
+Traceback (most recent call last):
+  File &quot;&amp;lt;stdin&amp;gt;&quot;, line 1, in &amp;lt;module&amp;gt;
+TypeError: &#39;generator&#39; object has no attribute &#39;__getitem__&#39;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;函数 &lt;code&gt;itertools.islice()&lt;/code&gt; 正好适用于在迭代器和生成器上做切片操作:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; from itertools import islice
+&amp;gt;&amp;gt;&amp;gt; list(islice(n, 2, 5))
+[8, 7, 6]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;注意： &lt;code&gt;islice()&lt;/code&gt; 会消耗掉传入的迭代器中的数据。 必须考虑到迭代器是不可逆的这个事实。&lt;/p&gt;
+
+&lt;p&gt;所以如果你需要之后再次访问这个迭代器的话，那你就得先将它里面的数据放入一个列表中。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# 接上
+&amp;gt;&amp;gt;&amp;gt; n.next()
+5
+&amp;gt;&amp;gt;&amp;gt; n.next()
+4
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;itertools-&quot;&gt;2.4 熟练掌握 itertools 模块&lt;/h2&gt;
+&lt;p&gt;参考这里&lt;a href=&quot;http://www.wklken.me/posts/2013/08/20/python-extra-itertools.html&quot;&gt;PYTHON-进阶-ITERTOOLS模块小结&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;section-4&quot;&gt;三.总结&lt;/h1&gt;
+
+&lt;h2 id=&quot;enumerate&quot;&gt;enumerate&lt;/h2&gt;
+
+&lt;p&gt;&lt;code&gt;enumerate()&lt;/code&gt;常用返回可迭代对象的索引和值，其返回的是一个 enumerate 对象实例， 它是一个迭代器，返回连续的包含一个计数和一个值的元组。这种情况在你遍历文件时想在错误消息中使用行号定位时候非常有用：如用户上传excel处理，如发现错误则记录行号反馈给用户。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;with open(filename, &#39;rt&#39;) as f:
+    for lineno, line in enumerate(f, 1):
+    	# todo.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;zip-vs-itertoolsziplongest&quot;&gt;zip VS itertools.zip_longest&lt;/h2&gt;
+
+&lt;p&gt;两者都可同时&lt;strong&gt;迭代多个序列&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;zip()&lt;/code&gt;会创建一个迭代器来作为结果返回，可配合&lt;code&gt;list&lt;/code&gt;, ‘dict’等使用&lt;/p&gt;
+
+&lt;p&gt;使用&lt;code&gt;zip()&lt;/code&gt;则迭代长度跟参数中最短序列长度一致：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; a = [1, 2, 3]
+&amp;gt;&amp;gt;&amp;gt; b = [&#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
+&amp;gt;&amp;gt;&amp;gt; for i in zip(a,b):
+...     print(i)
+...
+(1, &#39;w&#39;)
+(2, &#39;x&#39;)
+(3, &#39;y&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;使用&lt;code&gt;itertools.zip_longest()&lt;/code&gt;(Python3.x，如果是python2.6+, 则是&lt;code&gt;izip_longest&lt;/code&gt;)则迭代长度跟参数中最长序列长度一致：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; from itertools import izip_longest
+&amp;gt;&amp;gt;&amp;gt; list(izip_longest(a,b))
+[(1, &#39;w&#39;), (2, &#39;x&#39;), (3, &#39;y&#39;), (None, &#39;z&#39;)]
+&amp;gt;&amp;gt;&amp;gt; list(izip_longest(a,b, fillvalue=0))
+[(1, &#39;w&#39;), (2, &#39;x&#39;), (3, &#39;y&#39;), (0, &#39;z&#39;)]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;注意，还可以使用&lt;code&gt;map()&lt;/code&gt;：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; map(None, a, b)
+[(1, &#39;w&#39;), (2, &#39;x&#39;), (3, &#39;y&#39;), (None, &#39;z&#39;)]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;itertoolschain-vs-add&quot;&gt;itertools.chain() Vs add&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; from itertools import chain
+&amp;gt;&amp;gt;&amp;gt; chain(a, b)
+&amp;lt;itertools.chain object at 0x10e22a110&amp;gt;
+
+&amp;gt;&amp;gt;&amp;gt; list(chain(a, b))
+[1, 2, 3, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
+
+&amp;gt;&amp;gt;&amp;gt; a+b
+[1, 2, 3, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;z&#39;]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;itertools.chain()&lt;/code&gt; 接受一个或多个可迭代对象最为输入参数。 然后&lt;strong&gt;创建一个迭代器&lt;/strong&gt;，依次连续的返回每个可迭代对象中的元素。 &lt;strong&gt;这种方式要比先将序列合并再迭代要高效的多&lt;/strong&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;a + b 操作会创建一个&lt;strong&gt;全新的序列并要求a和b的类型一致&lt;/strong&gt;,&lt;code&gt;chian()&lt;/code&gt; 不会有这一步，所以如果输入序列非常大的时候会很&lt;strong&gt;省内存&lt;/strong&gt;。 并且当可迭代对象类型不一样的时候 chain() 同样可以很好的工作。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;ref:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://python3-cookbook.readthedocs.org/zh_CN/latest/chapters/p04_iterators_and_generators.html&quot;&gt;Python Cookbook 迭代器与生成器&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://pyzh.readthedocs.org/en/latest/the-python-yield-keyword-explained.html&quot;&gt;3. (译)Python关键字yield的解释(stackoverflow)&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://stackoverflow.com/questions/17581332/converting-yield-from-statement-to-python-2-7-code&quot;&gt;converting “yield from” statement to python 2.7 code&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Sat, 09 Jan 2016 00:00:00 +0800</pubDate>
+        <link>http://universus.cn/python/2016/01/09/python-iterator-and-generators/</link>
+        <guid isPermaLink="true">http://universus.cn/python/2016/01/09/python-iterator-and-generators/</guid>
+        
+        <category>python</category>
+        
+        
+        <category>python</category>
+        
+      </item>
+    
+      <item>
+        <title>Mongodb聚合</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;图片来源：纪录片《轮回》&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;人类对光的渴望与生俱来，在《圣经·创世纪》中被神第一个创造出来的便是光，从而区分明暗。人类通过光观察宇宙与尘埃，通过固定光的痕迹来记录时间与历史，用光重现过去演绎未来。人类对光的研究与控制也从未停止。 –《品质德国》&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;聚合的本质：&lt;strong&gt;分析结果集&lt;/strong&gt;， 如下工具和命令：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;聚合框架
+    &lt;ul&gt;
+      &lt;li&gt;筛选(filtering)&lt;/li&gt;
+      &lt;li&gt;投射(projecting)&lt;/li&gt;
+      &lt;li&gt;分组(grouping)&lt;/li&gt;
+      &lt;li&gt;排序(sorting)&lt;/li&gt;
+      &lt;li&gt;限制(limiting)&lt;/li&gt;
+      &lt;li&gt;跳过(skipping)&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;MapReduce&lt;/li&gt;
+  &lt;li&gt;聚合命令
+    &lt;ul&gt;
+      &lt;li&gt;count&lt;/li&gt;
+      &lt;li&gt;distinct&lt;/li&gt;
+      &lt;li&gt;group&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;一.聚合框架&lt;/h1&gt;
+&lt;p&gt;关于聚合，最好先查看文档:&lt;a href=&quot;https://docs.mongodb.org/manual/reference/operator/aggregation/&quot;&gt;&lt;strong&gt;Aggregation Pipeline Operators&lt;/strong&gt;&lt;/a&gt; (呦西，很全), 剩下的事情就是在使用中慢慢总结了，不懂的就看文档。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;如果需要对查询数据做分析等特殊处理，就首先考虑聚合，可针对要处理的，聚合操作符分为算术，字符串，日期时间，数组，布尔，设置，比较等等，总有一款适合你。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;如计算用户发送事件最多的前10名排行榜：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.event.aggregate({&quot;$project&quot;: {&quot;user_id&quot;: 1}},
+... {&quot;$group&quot;: {&quot;_id&quot;: &quot;$user_id&quot;, &quot;count&quot;: {&quot;$sum&quot;: 1}}},
+... {&quot;$sort&quot;: {&quot;count&quot;: -1}},
+... {&quot;$limit&quot;: 10})
+{ &quot;_id&quot; : 381709, &quot;count&quot; : 133 }
+{ &quot;_id&quot; : 426402, &quot;count&quot; : 91 }
+{ &quot;_id&quot; : 430556, &quot;count&quot; : 86 }
+{ &quot;_id&quot; : 289521, &quot;count&quot; : 64 }
+{ &quot;_id&quot; : 430569, &quot;count&quot; : 46 }
+{ &quot;_id&quot; : 431041, &quot;count&quot; : 35 }
+{ &quot;_id&quot; : 430517, &quot;count&quot; : 25 }
+{ &quot;_id&quot; : 381712, &quot;count&quot; : 19 }
+{ &quot;_id&quot; : 427115, &quot;count&quot; : 7 }
+{ &quot;_id&quot; : 430571, &quot;count&quot; : 7 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;aggregate()&lt;/code&gt;返回数组, 每个操作作为参数，逗号分隔，第一个处理完了交给第二个，以此类推，有点像*uinx管道符&lt;code&gt;|&lt;/code&gt;的意思，在mongodb里也称之为&lt;strong&gt;管道&lt;/strong&gt;， 下面来解释根据mongo提供的&lt;strong&gt;管道操作符&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;match&quot;&gt;1.1 $match&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;$match&lt;/code&gt; 筛选的意思，如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{&quot;$match&quot;: {&quot;title&quot;: &quot;good&quot;}}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以与常规&lt;strong&gt;查询操作符&lt;/strong&gt;配合使用，如&lt;code&gt;$gt&lt;/code&gt;,&lt;code&gt;$in&lt;/code&gt;等， &lt;code&gt;$match&lt;/code&gt;应该放在管道前面位置。&lt;/p&gt;
+
+&lt;h2 id=&quot;project&quot;&gt;1.2 $project&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;$project&lt;/code&gt;投射的意思，与普通的find查询相比，它能够：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;管道&lt;/li&gt;
+  &lt;li&gt;从子文档中提取字段&lt;/li&gt;
+  &lt;li&gt;可操作字段，如重命名字段&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;如下实例：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//只投射出title字段
+&amp;gt; db.foo.aggregate({&quot;$project&quot;: {&quot;title&quot;: 1, &quot;_id&quot;: 0}})
+{ &quot;title&quot; : &quot;good&quot; }
+{ &quot;title&quot; : &quot;lll&quot; }
+
+//注意哦，不存在也会显示
+&amp;gt; db.foo.find()
+{ &quot;_id&quot; : ObjectId(&quot;568e1534ba4afd0154378c08&quot;), &quot;title&quot; : &quot;good&quot;}
+{ &quot;_id&quot; : ObjectId(&quot;568e170eba4afd0154378c09&quot;), &quot;title&quot; : &quot;lll&quot;}
+{ &quot;_id&quot; : ObjectId(&quot;568f7b79203665df33bf39ef&quot;), &quot;pay&quot; : { &quot;book&quot; : 1000, &quot;food&quot; : 3000 } }
+{ &quot;_id&quot; : ObjectId(&quot;568f7c2f203665df33bf39f0&quot;), &quot;pay&quot; : &quot;ok&quot;, &quot;book&quot; : 1000, &quot;food&quot; : 3000 }
+&amp;gt; db.foo.aggregate({&quot;$project&quot;: {&quot;pay&quot;: 1, &quot;_id&quot;: 0}})
+{  }
+{  }
+{ &quot;pay&quot; : { &quot;book&quot; : 1000, &quot;food&quot; : 3000 } }
+{ &quot;pay&quot; : &quot;ok&quot; }
+
+//重命名title字段
+&amp;gt; db.foo.aggregate({&quot;$project&quot;: {&quot;重命名&quot;: &quot;$title&quot;, &quot;title&quot;: 1, &quot;_id&quot;: 0}})
+{ &quot;title&quot; : &quot;good&quot;, &quot;重命名&quot; : &quot;good&quot; }
+{ &quot;title&quot; : &quot;lll&quot;, &quot;重命名&quot; : &quot;lll&quot; }
+
+&amp;gt; db.foo.aggregate({&quot;$project&quot;: {&quot;重命名&quot;: &quot;$title&quot;}})
+{ &quot;_id&quot; : ObjectId(&quot;568e1534ba4afd0154378c08&quot;), &quot;重命名&quot; : &quot;good&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;568e170eba4afd0154378c09&quot;), &quot;重命名&quot; : &quot;lll&quot; }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;总结：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;{“filename”: 1}, 1表示投射该字段，0表示不投射.&lt;/li&gt;
+  &lt;li&gt;如果投射的字段不存在则也会显示出来&lt;/li&gt;
+  &lt;li&gt;$filename, 表示要引用字段，如”$age”替换age字段的内容， “$tags.3”替换tags数组第4个元素&lt;/li&gt;
+  &lt;li&gt;重命名字段后，如果该字段有索引则聚合框架内无法使用重命名后的字段索引， 如： {new: $old}, {‘$sort’: {“new”: 1}} 无法使用索引，所以&lt;strong&gt;在重命名前尽量先使用索引。&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;$project十分强大，还可使用表达式将多个字面量和变量组合在一个值中使用&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;看文档，看文档，看文档。重要的事情说三遍。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;group&quot;&gt;1.3 $group&lt;/h2&gt;
+&lt;p&gt;根据特定字段进行分组。如果选定好要分组的字段后，传给&lt;code&gt;_id&lt;/code&gt;字段。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//根据天分组
+{$group: {_id: &quot;$day&quot;}
+
+//根据城市分组，每个city/state做分组
+{$group: {_id: {&quot;state&quot;: &quot;$state&quot;, &quot;city&quot;: &quot;$city&quot;}}}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;比如一份账单如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.foo.find()
+{ &quot;_id&quot; : 1, &quot;item&quot; : &quot;abc&quot;, &quot;price&quot; : 10, &quot;quantity&quot; : 2, &quot;date&quot; : ISODate(&quot;2014-03-01T08:00:00Z&quot;) }
+{ &quot;_id&quot; : 2, &quot;item&quot; : &quot;jkl&quot;, &quot;price&quot; : 20, &quot;quantity&quot; : 1, &quot;date&quot; : ISODate(&quot;2014-03-01T09:00:00Z&quot;) }
+{ &quot;_id&quot; : 3, &quot;item&quot; : &quot;xyz&quot;, &quot;price&quot; : 5, &quot;quantity&quot; : 10, &quot;date&quot; : ISODate(&quot;2014-03-15T09:00:00Z&quot;) }
+{ &quot;_id&quot; : 4, &quot;item&quot; : &quot;xyz&quot;, &quot;price&quot; : 5, &quot;quantity&quot; : 20, &quot;date&quot; : ISODate(&quot;2014-04-04T11:21:39.736Z&quot;) }
+{ &quot;_id&quot; : 5, &quot;item&quot; : &quot;abc&quot;, &quot;price&quot; : 10, &quot;quantity&quot; : 10, &quot;date&quot; : ISODate(&quot;2014-04-04T21:23:13.331Z&quot;) }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;我们以月，天和年进行分组：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// 构造分组条件
+var qs = {
+	&quot;$group&quot; : {
+		&quot;_id&quot; : {
+			&quot;month&quot; : {
+				&quot;$month&quot; : &quot;$date&quot;
+			},
+			&quot;day&quot; : {
+				&quot;$dayOfMonth&quot; : &quot;$date&quot;
+			},
+			&quot;year&quot; : {
+				&quot;$year&quot; : &quot;$date&quot;
+			}
+		}
+	}
+}
+
+// 按月，天，年分组
+&amp;gt; db.foo.aggregate(qs)
+{ &quot;_id&quot; : { &quot;month&quot; : 3, &quot;day&quot; : 15, &quot;year&quot; : 2014 } }
+{ &quot;_id&quot; : { &quot;month&quot; : 4, &quot;day&quot; : 4, &quot;year&quot; : 2014 } }
+{ &quot;_id&quot; : { &quot;month&quot; : 3, &quot;day&quot; : 1, &quot;year&quot; : 2014 } }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;我们还想查总价，评价数，分组数，可以用到分组操作符，分组操作符就是对每个分组进行计算。相关的操作符看参考&lt;a href=&quot;https://docs.mongodb.org/manual/reference/operator/aggregation/group/#accumulator-operator&quot;&gt;&lt;strong&gt;Accumulator Operator¶&lt;/strong&gt;&lt;/a&gt;。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+	&quot;$group&quot; : {
+		&quot;_id&quot; : {
+			&quot;month&quot; : {
+				&quot;$month&quot; : &quot;$date&quot;
+			},
+			&quot;day&quot; : {
+				&quot;$dayOfMonth&quot; : &quot;$date&quot;
+			},
+			&quot;year&quot; : {
+				&quot;$year&quot; : &quot;$date&quot;
+			}
+		},
+		&quot;totalPrice&quot; : {
+			&quot;$sum&quot; : {
+				&quot;$multiply&quot; : [
+					&quot;$price&quot;,
+					&quot;$quantity&quot;
+				]
+			}
+		},
+		&quot;averageQuantity&quot; : {
+			&quot;$avg&quot; : &quot;$quantity&quot;
+		},
+		&quot;count&quot; : {
+			&quot;$sum&quot; : 1
+		}
+	}
+}
+
+&amp;gt; db.foo.aggregate(qs)
+{ &quot;_id&quot; : { &quot;month&quot; : 3, &quot;day&quot; : 15, &quot;year&quot; : 2014 }, &quot;totalPrice&quot; : 50, &quot;averageQuantity&quot; : 10, &quot;count&quot; : 1 }
+{ &quot;_id&quot; : { &quot;month&quot; : 4, &quot;day&quot; : 4, &quot;year&quot; : 2014 }, &quot;totalPrice&quot; : 200, &quot;averageQuantity&quot; : 15, &quot;count&quot; : 2 }
+{ &quot;_id&quot; : { &quot;month&quot; : 3, &quot;day&quot; : 1, &quot;year&quot; : 2014 }, &quot;totalPrice&quot; : 40, &quot;averageQuantity&quot; : 1.5, &quot;count&quot; : 2 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;再比如说，分组后求最大，最小：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.foo.aggregate({$group: {_id: &quot;$item&quot;, &quot;low&quot;: {&quot;$min&quot;: &quot;$price&quot;},&quot;max&quot;:{&quot;$max&quot;: &quot;$price&quot;}}})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;unwind&quot;&gt;1.4 $unwind&lt;/h2&gt;
+
+&lt;p&gt;拆分的意思，用于将数组中每个值拆分成独立文档，这个比较强大。如&lt;strong&gt;查询特定子文档，然后$match进行在处理&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.foo.find().pretty()
+{
+	&quot;_id&quot; : ObjectId(&quot;568fd068&quot;),
+	&quot;author&quot; : &quot;k&quot;,
+	&quot;post&quot; : &quot;hello world&quot;,
+	&quot;comments&quot; : [
+		{
+			&quot;author&quot; : &quot;Jack&quot;,
+			&quot;txt&quot; : &quot;good&quot;
+		},
+		{
+			&quot;author&quot; : &quot;Li&quot;,
+			&quot;txt&quot; : &quot;well&quot;
+		}
+	]
+}
+
+&amp;gt; db.foo.aggregate(
+... {$project: {&quot;comments&quot;: &quot;$comments&quot;}},
+... {$unwind: &quot;$comments&quot;},
+... {$match: {&quot;comments.author&quot;: &quot;Jack&quot;}}
+... )
+{ &quot;_id&quot; : ObjectId(&quot;568fd5324&quot;), &quot;comments&quot; : { &quot;author&quot; : &quot;Jack&quot;, &quot;txt&quot; : &quot;good&quot; } }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;sort&quot;&gt;1.5 $sort&lt;/h2&gt;
+&lt;p&gt;排序用的，与普通查询语法相同.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ $sort: { &amp;lt;field1&amp;gt;: &amp;lt;sort order&amp;gt;, &amp;lt;field2&amp;gt;: &amp;lt;sort order&amp;gt; ... } }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//普通查询
+&amp;gt; db.foo.find().sort({&quot;age&quot;: -1, &quot;post&quot;: -1})
+//聚合
+&amp;gt; db.foo.aggregate({$sort: {age: -1, post: -1}})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;比如有个员工表，要按照薪资高低排序，然后按照姓名A-Z排序：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//构造$project投射条件，注意排序可以使用文档存在的字段，也可使用投射重命名的字段
+&amp;gt; f1
+{
+	&quot;$project&quot; : {
+		&quot;money&quot; : {
+			&quot;$add&quot; : [
+				&quot;$salary&quot;,
+				&quot;$bonus&quot;
+			]
+		},
+		&quot;name&quot; : 1
+	}
+}
+//构造$sort字段，如下的money字段,是薪资和奖金的和
+&amp;gt; f2
+{ &quot;$sort&quot; : { &quot;money&quot; : -1, &quot;name&quot; : 1 } }
+
+//执行聚合
+&amp;gt; db.foo.aggregate(f1)
+{ &quot;_id&quot; : ObjectId(&quot;569073e9eb107d&quot;), &quot;name&quot; : &quot;Jack&quot;, &quot;money&quot; : 12000 }
+{ &quot;_id&quot; : ObjectId(&quot;569073e9eb107e&quot;), &quot;name&quot; : &quot;Bob&quot;, &quot;money&quot; : 14000 }
+{ &quot;_id&quot; : ObjectId(&quot;569073e9eb107f&quot;), &quot;name&quot; : &quot;Alien&quot;, &quot;money&quot; : 9000 }
+{ &quot;_id&quot; : ObjectId(&quot;569073e9eb1080&quot;), &quot;name&quot; : &quot;Ben&quot;, &quot;money&quot; : 18000 }
+{ &quot;_id&quot; : ObjectId(&quot;569073e9eb1081&quot;), &quot;name&quot; : &quot;Zen&quot;, &quot;money&quot; : 14000 }
+
+//先按照薪资从高到低排序，然后在按照姓名A-Z正序
+&amp;gt; db.foo.aggregate(f1, f2)
+{ &quot;_id&quot; : ObjectId(&quot;569073e9eb1080&quot;), &quot;name&quot; : &quot;Ben&quot;, &quot;money&quot; : 18000 }
+{ &quot;_id&quot; : ObjectId(&quot;569073e9eb107e&quot;), &quot;name&quot; : &quot;Bob&quot;, &quot;money&quot; : 14000 }
+{ &quot;_id&quot; : ObjectId(&quot;569073e9eb1081&quot;), &quot;name&quot; : &quot;Zen&quot;, &quot;money&quot; : 14000 }
+{ &quot;_id&quot; : ObjectId(&quot;569073e9eb107d&quot;), &quot;name&quot; : &quot;Jack&quot;, &quot;money&quot; : 12000 }
+{ &quot;_id&quot; : ObjectId(&quot;569073e9eb107f&quot;), &quot;name&quot; : &quot;Alien&quot;, &quot;money&quot; : 9000 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;注意：&lt;strong&gt;如果对大量文档进行排序，首先应该在管道第一阶段进行排序，这时的排序操作可以使用索引，否则排序过程就比较慢，还会占用大量内存。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;如上的操作就不能使用索引，因为第一阶段是投射。&lt;/p&gt;
+
+&lt;h2 id=&quot;limit&quot;&gt;1.6 $limit&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;$limit&lt;/code&gt; n 返回集合中前n个文档&lt;/p&gt;
+
+&lt;h2 id=&quot;skip&quot;&gt;1.7 $skip&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;$skip&lt;/code&gt; n 丢弃集合中前n个文档&lt;/p&gt;
+
+&lt;h2 id=&quot;section-1&quot;&gt;1.8 使用管道注意事项&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;在管道基于内存，将结果集放在内存中，所以要避免大文档，如果Mongodb发现聚合操作占用20%内存则报错&lt;/li&gt;
+  &lt;li&gt;聚合操作的结果可以放在一个集合中方便以后使用&lt;/li&gt;
+  &lt;li&gt;在聚合开始阶段尽可能的将文档或字段过滤掉，减少内存开销&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;mapreduce&quot;&gt;二.MapReduce&lt;/h1&gt;
+&lt;p&gt;MapReduce是非常强大的聚合工具，在上面的情况无法完成任务时，可尝试MapReduce，它&lt;strong&gt;使用Js作为查询语言&lt;/strong&gt;，可以表达复杂的逻辑，但它&lt;strong&gt;很慢&lt;/strong&gt;的。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-2&quot;&gt;三.聚合命令&lt;/h1&gt;
+&lt;p&gt;注意区别聚合框架和聚合命令。在3.X版本中，它们都作为&lt;a href=&quot;https://docs.mongodb.org/manual/reference/method/js-collection/&quot;&gt;&lt;strong&gt;Collection Methods&lt;/strong&gt;&lt;/a&gt;, 不知道《Mongodb权威指南》怎么说成聚合命令的，还有一点就是书上版本太低，具体还要参考文档。&lt;/p&gt;
+
+&lt;h2 id=&quot;count&quot;&gt;3.1 count&lt;/h2&gt;
+&lt;p&gt;返回集合文档中数量&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.foo.count()
+5
+&amp;gt; db.foo.count({&quot;name&quot;: &quot;Jack&quot;})
+1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;注意：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;count()命令非常快，可做分页总数&lt;/li&gt;
+  &lt;li&gt;count()使用索引&lt;/li&gt;
+  &lt;li&gt;count({..}) 查询条件会使count变慢，还不如直接查询快。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;distinct&quot;&gt;3.2 distinct&lt;/h2&gt;
+&lt;p&gt;找出给定键的所有不同值。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.collection.distinct(field, query)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;如下实例：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.bar.find({}, {_id: 0})
+{ &quot;dept&quot; : &quot;A&quot;, &quot;item&quot; : { &quot;sku&quot; : &quot;111&quot;, &quot;color&quot; : &quot;red&quot; }, &quot;sizes&quot; : [ &quot;S&quot;, &quot;M&quot; ] }
+{ &quot;dept&quot; : &quot;A&quot;, &quot;item&quot; : { &quot;sku&quot; : &quot;111&quot;, &quot;color&quot; : &quot;blue&quot; }, &quot;sizes&quot; : [ &quot;M&quot;, &quot;L&quot; ] }
+{ &quot;dept&quot; : &quot;B&quot;, &quot;item&quot; : { &quot;sku&quot; : &quot;222&quot;, &quot;color&quot; : &quot;blue&quot; }, &quot;sizes&quot; : &quot;S&quot; }
+{ &quot;dept&quot; : &quot;A&quot;, &quot;item&quot; : { &quot;sku&quot; : &quot;333&quot;, &quot;color&quot; : &quot;black&quot; }, &quot;sizes&quot; : [ &quot;S&quot; ] }
+
+&amp;gt; db.bar.distinct( &quot;dept&quot; )
+[ &quot;A&quot;, &quot;B&quot; ]
+
+&amp;gt; db.bar.distinct( &quot;item.sku&quot; )
+[ &quot;111&quot;, &quot;222&quot;, &quot;333&quot; ]
+
+&amp;gt; db.bar.distinct( &quot;item.sku&quot;, { dept: &quot;A&quot; } )
+[ &quot;111&quot;, &quot;333&quot; ]
+
+//数组
+&amp;gt; db.bar.distinct( &quot;sizes&quot; )
+[ &quot;M&quot;, &quot;S&quot;, &quot;L&quot; ]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;group-1&quot;&gt;3.3 group&lt;/h2&gt;
+&lt;p&gt;功能很强大，比集合框架的&lt;code&gt;$group&lt;/code&gt;还牛叉，使用js做复杂的处理。文档&lt;a href=&quot;https://docs.mongodb.org/manual/reference/method/db.collection.group/#db-collection-group&quot;&gt;db.collection.group()&lt;/a&gt;在此。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;最高效的学习就是：实践–&amp;gt;犯错–&amp;gt;大量应用–&amp;gt;回顾–&amp;gt;总结–&amp;gt;创新！可见工作环境是多重要，可以提供给你更多实践和探讨的机会。我就有点闭门造车了。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+        <pubDate>Fri, 08 Jan 2016 00:00:00 +0800</pubDate>
+        <link>http://universus.cn/mongodb/2016/01/08/mongo-aggregation/</link>
+        <guid isPermaLink="true">http://universus.cn/mongodb/2016/01/08/mongo-aggregation/</guid>
+        
+        <category>mongodb</category>
+        
+        
+        <category>mongodb</category>
+        
+      </item>
+    
+      <item>
+        <title>Mongodb固定集合和特殊索引</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;图片来自纪录片《轮回》&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;德国哲学中的德意志精神，始终与人密切相关。黑格尔认为，国家是人自由的真正体现。马克思则相反，说只有消除国家，人的本质才能真正恢复。– 《品质德国》&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;一.固定集合&lt;/h1&gt;
+&lt;p&gt;固定集合就是创建一个指定大小的集合，有如下特点：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;有序排列，插入速度快&lt;/li&gt;
+  &lt;li&gt;大小固定，当插满后最老的数据会被删除，然后插入新数据&lt;/li&gt;
+  &lt;li&gt;固定集合不能分片&lt;/li&gt;
+  &lt;li&gt;一旦创建完成就不能再更改其属性了，除非删掉重建&lt;/li&gt;
+  &lt;li&gt;提供循环游标，不断的对查询结果(getNext())进行处理，如果hasNext()没有数据则等待插入，一旦有数据则立马处理，等待10分钟后自动释放(dead())&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;固定集合必须显式创建&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//创建名为my_collection最大字节10000的固定集合
+&amp;gt; db.createCollection(&quot;my_collection&quot;, {&quot;capped&quot;: true, &quot;size&quot;: 10000})
+{ &quot;ok&quot; : 1 }
+
+//创建名为my_collection_2最大字节为10000且最大文档数为100的固定集合
+&amp;gt; db.createCollection(&quot;my_collection_2&quot;, {&quot;capped&quot;: true, &quot;size&quot;: 10000, &quot;max&quot;: 100})
+{ &quot;ok&quot; : 1 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;固定集合适用：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;记录日志&lt;/li&gt;
+  &lt;li&gt;记录Top,如最新的10条新闻&lt;/li&gt;
+  &lt;li&gt;限制， 如以每个用户作固定集合名，限制其创建的最大文档数，如果超限了，呵呵，付费。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;记住：&lt;strong&gt;可以将常规集合转换为固定集合，但不能将固定集合转为常规集合&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.runCommand({&quot;converToCapped&quot;: &quot;normal_collection&quot;, &quot;size&quot;: 1000})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;由于固定集合有插入顺序，那么在查询的时候需要使用&lt;code&gt;{&quot;$natural&quot; : -1}&lt;/code&gt;进行自然排序（就是文档在磁盘的顺序）。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.my_collection.find().sort({&quot;$natural&quot;: -1})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&quot;section-1&quot;&gt;二.特殊索引&lt;/h1&gt;
+
+&lt;h2 id=&quot;ttl&quot;&gt;2.1 TTL索引&lt;/h2&gt;
+
+&lt;p&gt;设置过期时间，超时后该文档会被删除。如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//mydate日期时间字段加ttl索引，超时时间2min
+db.foo.ensureIndex({&quot;mydate&quot;: 1}, {&quot;expireAfterSeconds&quot;: 60*2})
+
+&amp;gt; db.foo.insert({&quot;my&quot;: &quot;bm&quot;, &quot;mydate&quot;: new Date()})
+WriteResult({ &quot;nInserted&quot; : 1 })
+
+&amp;gt; db.foo.find()
+{ &quot;_id&quot; : ObjectId(&quot;568e1b2d203665df33bf39ee&quot;), &quot;my&quot; : &quot;bm&quot;, &quot;mydate&quot; : ISODate(&quot;2016-01-07T08:00:45.009Z&quot;) }
+
+// 2min后查询发现被删了
+&amp;gt; db.foo.find()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;我个人不太推荐过期处理用它，我觉得不如redis用着爽，因为我第一次创建的时候等了好久数据竟然没删掉，之后重新设置ttl索引，才有效，还有几点注意：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;TTL索引只能建立在单独字段上，在复合索引上无法指定TTL属性&lt;/li&gt;
+  &lt;li&gt;只能用于日期时间对象的字段&lt;/li&gt;
+  &lt;li&gt;如果索引字段包含一个数组且其中有多个日期类型数据, MongoDB 将会匹配最早的一个日期移除数据.&lt;/li&gt;
+  &lt;li&gt;创建TTL索引后，MongoDB会有一个TTL后台线程来负责管理文档，当达到超时间时会将文档删除&lt;/li&gt;
+  &lt;li&gt;TTL索引不能保证达到过期时间时，立即将文档删除，中间可能会有一定的延迟&lt;/li&gt;
+  &lt;li&gt;至于过期文档的移除操作, MongoDB 的后台任务会&lt;strong&gt;每分钟&lt;/strong&gt;检查一次过期文档, 并且移除操作的耗时也要取决于当前服务器的负载, 所以过期文档通常会存在一个移除延迟, 这个时间可能会超过 1 分钟.&lt;/li&gt;
+  &lt;li&gt;除了以上限制外, TTL 索引和普通索引没任何区别, 也可以用来进行查询.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;也可以随时修改这个时间阈值&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.runCommand({&quot;collMod&quot;: &quot;集合名.文档字段&quot;, &quot;expireAfterSecs&quot;: 秒})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;2.2 全文本索引&lt;/h2&gt;
+&lt;p&gt;我这一本《Mongodb权威指南》太尼玛老了，版本太低了。full text search(fts：全文搜素)是在版本2.4新加的特性，我估计该书使用的就是2.4版本。目前支持15种语言(就是&lt;strong&gt;不支持中文&lt;/strong&gt;，世界第一语言竟然都不支持。)的全文索引。&lt;/p&gt;
+
+&lt;p&gt;还有一点，创建全文本索引是最耗性能的，目前还不稳定，常用全文检索有lucene，sphinx，redis。&lt;/p&gt;
+
+&lt;p&gt;可参考&lt;a href=&quot;http://www.ttlsa.com/mongodb/mongodb-full-text-search-mongodb-ttlsa-tutorial-series/&quot;&gt;mongodb 全文搜索—ttlsa教程系列之mongodb(十)&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-3&quot;&gt;2.3 地理空间索引&lt;/h2&gt;
+&lt;p&gt;对于LBS(Location-Based Service，LBS)置于位置的服务用的越来越多，Mongodb专门针对这种查询建立了地理空间索引。 2d和2dsphere索引，分别是针对平面和球面。&lt;/p&gt;
+
+&lt;p&gt;针对2dsphere索引，球面的，可以按照坐标轴：经度，纬度的方式把位置数据存储为GeoJSON对象。&lt;/p&gt;
+
+&lt;p&gt;这里了解下，没搞过LBS项目。&lt;/p&gt;
+
+&lt;h2 id=&quot;gridfs&quot;&gt;2.4 GridFS存储文件&lt;/h2&gt;
+&lt;p&gt;mongodb使用mongofiles工具&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;谨记:对于不熟悉的命令首先一定要–help查看帮助！&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;mongofiles --help&lt;/code&gt;查看帮助&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;➜  ~  mongofiles -d gridfs put a.txt 
+2016-01-07T17:00:23.556+0800	connected to: localhost
+added file: a.txt
+
+&amp;gt; use gridfs
+switched to db gridfs
+// 获取文件信息
+&amp;gt; db.fs.files.find()
+{ &quot;_id&quot; : ObjectId(&quot;568e29273a53f23565000001&quot;), &quot;chunkSize&quot; : 261120, &quot;uploadDate&quot; : ISODate(&quot;2016-01-07T09:00:23.897Z&quot;), &quot;length&quot; : 129, &quot;md5&quot; : &quot;f4d682f9c86e5f18af876f13ff4b4b46&quot;, &quot;filename&quot; : &quot;a.txt&quot; }
+// 获取文件块
+&amp;gt; db.fs.chunks.find({files_id: ObjectId(&quot;568e29273a53f23565000001&quot;)})
+{ &quot;_id&quot; : ObjectId(&quot;568e29273a53f23565000002&quot;), &quot;files_id&quot; : ObjectId(&quot;568e29273a53f23565000001&quot;), &quot;n&quot; : 0, &quot;data&quot; : BinData(0,&quot;am9bmdoYWkK&quot;) }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;对于小文件如大量图片等可以用&lt;a href=&quot;http://tech.uc.cn/?p=221&quot;&gt;fastDFS&lt;/a&gt;存储，不应该用mongodb GridFS，因为其本质上只是把文件内容存储在16M大小限制的document中，如果你只是存储图片文件，图片文件不大可能超过16M，如果要存储视频文件，使用GridFS倒是可以更利于产生流信息，因为一次只需要读取一个Document。 &lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;对于Python的使用，可看下这个小项目&lt;a href=&quot;https://github.com/BeginMan/flask-dessert/blob/master/tools/mongo_gridfs-app.py&quot;&gt;flask mongodb GridFS实例&lt;/a&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Thu, 07 Jan 2016 00:00:00 +0800</pubDate>
+        <link>http://universus.cn/mongodb/2016/01/07/mongo-fixed-collection-and-special-index/</link>
+        <guid isPermaLink="true">http://universus.cn/mongodb/2016/01/07/mongo-fixed-collection-and-special-index/</guid>
+        
+        <category>mongodb</category>
+        
+        
+        <category>mongodb</category>
+        
+      </item>
+    
+      <item>
+        <title>Mongodb索引小结</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;摄于元旦晚天安门 2016/1/1&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;只要你还在担心别人会怎么看你，他们就能奴役你；只有你再也不用从自身之外寻求肯定，才能成为自己的主人。 –尼尔·唐纳德·沃尔什&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;索引如同书籍目录，有则择页，无则翻书（如关系型数据库的&lt;strong&gt;全表扫描&lt;/strong&gt;）。&lt;/p&gt;
+
+&lt;p&gt;比如我们插入10w数据，测试下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; for(i=0;i&amp;lt;100000;i++){
+... db.foo.insert(
+... {
+...     &quot;i&quot;: i,
+...     &quot;username&quot;: &quot;user&quot;+i,
+...     &quot;age&quot;: Math.floor(Math.random()*120),
+...     &quot;created&quot;: new Date()
+... })
+... }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;使用&lt;code&gt;find&lt;/code&gt;查询时可使用&lt;a href=&quot;https://docs.mongodb.org/manual/reference/method/cursor.explain/&quot;&gt;&lt;code&gt;explain()&lt;/code&gt;&lt;/a&gt;查看执行详情，发现确实扫描了全部文档，&lt;strong&gt;如果使用&lt;code&gt;limit(1)&lt;/code&gt;则会一直扫描直到找到该文档&lt;/strong&gt;。如果我们用索引了，那就简单了。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// username字段创建索引
+db.foo.ensureIndex({&quot;username&quot;: 1})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;再次使用&lt;code&gt;explain()&lt;/code&gt;查看只扫码了1个文档，就是它自己。好了，开始我们的正文吧。&lt;/p&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;一.索引的优缺点&lt;/h1&gt;
+
+&lt;p&gt;与关系型数据库的索引基本一致。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;优点：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;创建唯一性索引，保证数据的唯一性&lt;/li&gt;
+  &lt;li&gt;加快数据的检索速度(主要原因)&lt;/li&gt;
+  &lt;li&gt;索引的值是按照一定顺序排列的，使用索引键对文档进行排序非常快&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;缺点：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;创建索引和维护索引要耗费时间，这种时间随着数据量的增加而增加&lt;/li&gt;
+  &lt;li&gt;索引需要占物理空间&lt;/li&gt;
+  &lt;li&gt;当对文档进行写操作（插入，更新，删除），索引也要动态的维护，降低了数据的维护速度&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;明白这些优缺点后有助于我们做抉择，该不该有索引？选择哪些索引？哪些字段比较合适？&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;建议：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;mongodb限制每个集合最多有64个索引，通常，在一个特定集合中，&lt;strong&gt;索引数最好不要超过2个&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;选择热点字段或有可能是性能瓶颈的字段做索引&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;section-1&quot;&gt;二.索引类型&lt;/h1&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;2.1 普通索引&lt;/h2&gt;
+&lt;p&gt;就是单一索引&lt;/p&gt;
+
+&lt;h2 id=&quot;section-3&quot;&gt;2.2 复合索引&lt;/h2&gt;
+&lt;p&gt;复合索引(compound index)顾名思义就是多个索引。但是在排序时&lt;strong&gt;只有首先在使用索引键进行排序，索引才有用。&lt;/strong&gt;如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// 索引没啥优势
+// 先根据age排序，再根据username排序
+&amp;gt; db.foo.find().sort({&quot;age&quot;: 1, &quot;username&quot;: 1}).limit(100)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;故而需要在age上建立索引：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//建立复合索引
+//注意顺序很重要，最好与.sort({&quot;age&quot;: 1, &quot;username&quot;: 1})顺序一致，这样查询才是最高效的
+db.foo.ensureIndex({&quot;age&quot;: 1, &quot;username&quot;: 1})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这样操作后上面的代码才能发挥索引的优势。嗖的一下就出来了。。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;mongodb对索引的使用方式取决于查询的类型，下面三种主要方式&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;(1).单值查询，对已加索引键查询后，对其结果集进行排序&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;db.foo.find({&quot;age&quot;: 21}).sort({&quot;username&quot;: 1})
+{ &quot;_id&quot; : ObjectId(&quot;568cbdeb024&quot;), &quot;i&quot; : 100029, &quot;username&quot; : &quot;user100029&quot;, &quot;age&quot; : 21}
+{ &quot;_id&quot; : ObjectId(&quot;568cbdeb0c7&quot;), &quot;i&quot; : 100080, &quot;username&quot; : &quot;user100080&quot;, &quot;age&quot; : 21}
+{ &quot;_id&quot; : ObjectId(&quot;568bd8327a2&quot;), &quot;i&quot; : 10043, &quot;username&quot; : &quot;user10043&quot;, &quot;age&quot; : 21 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;匹配查询已经排序了(age)，然后在age的排序结果中再按照username排序。这样是比较高效的。&lt;/p&gt;
+
+&lt;p&gt;(2).多值查询，对已加索引键查询&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;db.foo.find({&quot;age&quot;: {&quot;$gte&quot;: 21, &quot;$lte&quot;: 30}})
+{ &quot;_id&quot; : ObjectId(&quot;568cbdeb0c724&quot;), &quot;i&quot; : 100029, &quot;username&quot; : &quot;user100029&quot;, &quot;age&quot; : 21 }
+{ &quot;_id&quot; : ObjectId(&quot;568cbde848757&quot;), &quot;i&quot; : 100080, &quot;username&quot; : &quot;user100080&quot;, &quot;age&quot; : 21 }
+{ &quot;_id&quot; : ObjectId(&quot;568cbdbe0c45f&quot;), &quot;i&quot; : 10043, &quot;username&quot; : &quot;user10043&quot;, &quot;age&quot; : 21 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这样也一样，&lt;strong&gt;按索引键进行查询，那么查询结果文档通常是按照索引顺序排序的。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;(3). 在内存中排序 &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;db.foo.find({&quot;age&quot;: {&quot;$gte&quot;: 21, &quot;$lte&quot;: 30}}).sort({&quot;username&quot;: 1})
+{ &quot;_id&quot; : ObjectId(&quot;568cbdb778&quot;), &quot;i&quot; : 10001, &quot;username&quot; : &quot;user10001&quot;, &quot;age&quot; : 23}
+{ &quot;_id&quot; : ObjectId(&quot;568cbx871c&quot;), &quot;i&quot; : 100021, &quot;username&quot; : &quot;user100021&quot;, &quot;age&quot; : 29}
+{ &quot;_id&quot; : ObjectId(&quot;568cs48724&quot;), &quot;i&quot; : 100029, &quot;username&quot; : &quot;user100029&quot;, &quot;age&quot; : 21}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在内存中先排序后再返回。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-4&quot;&gt;2.3 唯一索引&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;唯一索引确保集合中每个文档指定的键都有唯一值。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.user.ensureIndex({&quot;uid&quot;: 1}, {&quot;unique&quot;: true})
+&amp;gt; db.user.insert({&quot;uid&quot;: 1001, &quot;uname&quot;: &quot;Jack&quot;})
+&amp;gt; db.user.insert({&quot;uid&quot;: 1001, &quot;uname&quot;: &quot;Rose&quot;})
+..
+ 	..&quot;errmsg&quot; : &quot;E11000 duplicate key error index: foo.user.$uid_1 dup key: { : 1001.0 }&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;我们熟悉的&lt;code&gt;_id&lt;/code&gt;就是唯一索引，作为系统其不能被删除。&lt;/p&gt;
+
+&lt;p&gt;如果插入文档时缺少该索引字段的键，如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.user.insert({ &quot;uname&quot;: &quot;Rose&quot;})
+WriteResult({ &quot;nInserted&quot; : 1 })
+
+//但是当我们在此插入时却报错了
+&amp;gt; db.user.insert({ &quot;uname&quot;: &quot;Luck&quot;})
+..		
+	..&quot;errmsg&quot; : &quot;E11000 duplicate key error index: foo.user.$uid_1 dup key: { : null }&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;如果一个文档没有对应的键，索引会将其作为null存储，所以上述情况，由于集合中已存在一个该索引键的值为null的文档而导致插入失败。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-5&quot;&gt;2.4 复合唯一索引&lt;/h2&gt;
+&lt;p&gt;创建复合唯一索引时，单个键的值可以相同，但所有键的组合值必须是唯一的。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//username,age复合唯一索引
+&amp;gt; db.user.ensureIndex({&quot;username&quot;: 1, &quot;age&quot;: 1}, {&quot;unique&quot;: true})
+
+&amp;gt; db.user.insert({&quot;username&quot;: &quot;Jack&quot;})
+WriteResult({ &quot;nInserted&quot; : 1 })
+
+&amp;gt; db.user.insert({&quot;username&quot;: &quot;Jack&quot;, &quot;age&quot;: 20})
+WriteResult({ &quot;nInserted&quot; : 1 })
+
+&amp;gt; db.user.insert({&quot;username&quot;: &quot;Rose&quot;, &quot;age&quot;: 18})
+WriteResult({ &quot;nInserted&quot; : 1 })
+
+&amp;gt; db.user.insert({&quot;username&quot;: &quot;Rose&quot;})
+WriteResult({ &quot;nInserted&quot; : 1 })
+
+&amp;gt; db.user.insert({&quot;username&quot;: &quot;Rose&quot;})
+WriteResult({
+	&quot;nInserted&quot; : 0,
+	&quot;writeError&quot; : {
+		&quot;code&quot; : 11000,
+		&quot;errmsg&quot; : &quot;E11000 duplicate key error index: foo.user.$username_1_age_1 dup key: { : \&quot;Rose\&quot;, : null }&quot;
+	}
+})
+
+&amp;gt; db.user.insert({&quot;username&quot;: &quot;Rose&quot;, &quot;age&quot;: 18})
+WriteResult({
+	&quot;nInserted&quot; : 0,
+	&quot;writeError&quot; : {
+		&quot;code&quot; : 11000,
+		&quot;errmsg&quot; : &quot;E11000 duplicate key error index: foo.user.$username_1_age_1 dup key: { : \&quot;Rose\&quot;, : 18.0 }&quot;
+	}
+})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;section-6&quot;&gt;2.5 稀疏索引&lt;/h2&gt;
+&lt;p&gt;上面的null问题，如果只针对存在的字段的做唯一，则需要稀疏索引。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//对可选字段email做稀疏索引
+&amp;gt; db.user.ensureIndex({&quot;email&quot;: 1}, {&quot;unique&quot;: true, &quot;sparse&quot;: true})
+
+&amp;gt; db.user.insert({&quot;name&quot;: &quot;jack&quot;, &quot;age&quot;: 10, &quot;email&quot;: &quot;jack@163.com&quot;})
+WriteResult({ &quot;nInserted&quot; : 1 })
+
+&amp;gt; db.user.insert({&quot;name&quot;: &quot;jack&quot;, &quot;age&quot;: 10})
+WriteResult({ &quot;nInserted&quot; : 1 })
+
+&amp;gt; db.user.insert({&quot;name&quot;: &quot;jack&quot;, &quot;age&quot;: 10})
+WriteResult({ &quot;nInserted&quot; : 1 })
+
+&amp;gt; db.user.insert({&quot;name&quot;: &quot;jack&quot;, &quot;age&quot;: 10, &quot;email&quot;: &quot;jack@163.com&quot;})
+WriteResult({
+	&quot;nInserted&quot; : 0,
+	&quot;writeError&quot; : {
+		&quot;code&quot; : 11000,
+		&quot;errmsg&quot; : &quot;E11000 duplicate key error index: foo.user.$email_1 dup key: { : \&quot;jack@163.com\&quot; }&quot;
+	}
+})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&quot;section-7&quot;&gt;三.操作符$使用索引&lt;/h1&gt;
+&lt;p&gt;有些操作符无法使用索引，有些使用效率低，有些则高，这里总结下。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-8&quot;&gt;3.1 低效率的操作符&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;$exists&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;$ne&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;$not&lt;/code&gt; &amp;amp; &lt;code&gt;$nin&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;section-9&quot;&gt;3.2 范围&lt;/h2&gt;
+&lt;p&gt;复合索引大大优化了对于多字段查询效率，在使用时&lt;strong&gt;将精准匹配的条件放在前面，将范围查询放在最后&lt;/strong&gt;，这样将使用第一个索引进行精准匹配，然后再使用第二个索引范围在这个结果集内部进行搜索。如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//使用{&quot;age&quot;: 1, &quot;username&quot;: 1}索引
+db.users.find({&quot;age&quot;: 47, &quot;username&quot;: {&quot;$gt&quot;: &quot;user5&quot;, &quot;$lt&quot;: &quot;user8&quot;}})
+// 这个查询会直接定位到age为47的索引条目，然后在其中搜索用户名介于user5到user8的条目
+
+//如果反序使用{&quot;username&quot;: 1, &quot;age&quot;: 1}的索引
+//则查询必须先找到介于user5到user8所有用户(全表扫描了)，然后再从中挑选age=47的用户，这样会大大降低效率
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&quot;section-10&quot;&gt;四.索引对象和数组&lt;/h1&gt;
+&lt;p&gt;可以对嵌套文档内部和数组建立索引，与正常索引行为操作一致。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-11&quot;&gt;4.1 索引嵌套文档&lt;/h2&gt;
+
+&lt;p&gt;这里对内嵌文档name.first字段建立索引&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.users.insert({  
+    &quot;name&quot;:{  
+        &quot;first&quot;:&quot;Carey&quot;,  
+        &quot;last&quot;:&quot;Ickes&quot;  
+    },  
+    &quot;age&quot;:25  
+}) 
+//对第一个名字建立索引
+&amp;gt;db.users.ensureIndex({&quot;name.first&quot;: 1})
+//查询发现效率挺高的
+&amp;gt;db.users.find({&quot;name.first&quot;: &quot;Jack100&quot;}).explain(&quot;executionStats&quot;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;注意&lt;/strong&gt;：&lt;/p&gt;
+
+&lt;p&gt;对嵌套文档本身“name”建立索引，与对嵌套文档的某个字段（name.first）建立索引是完全不相同的。&lt;/p&gt;
+
+&lt;p&gt;对整个文档建立索引，只有在使用文档完整匹配时才会使用到这个索引：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//对嵌套文档本身“name”建立索引	
+&amp;gt;db.users.ensureIndex({&quot;name&quot;:1})
+
+//这种完整匹配时才会使用到这个索引
+&amp;gt;db.users.find({&quot;name&quot;:{&quot;first&quot;:&quot;xxx&quot;,&quot;last&quot;:&quot;xxx&quot;}})
+
+//是不会使用到该索引的。
+&amp;gt;db.users.find({&quot;name.first&quot;:&quot;xxx&quot;})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;section-12&quot;&gt;4.2 索引数组&lt;/h2&gt;
+&lt;p&gt;可以高效检索数组中的元素。&lt;/p&gt;
+
+&lt;p&gt;如博客评论，每篇文章都有一个comments字段作为数组，里面的每个子文档表示一条评论，如果要找出最近被评论次数最多的博客，则可以在comments数组的score键上建立索引：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.blog.insert({  
+    &quot;_id&quot;:&quot;B001&quot;,  
+    &quot;title&quot;:&quot;MongoDB查询&quot;,  
+    &quot;comments&quot;:[  
+      {&quot;name&quot;:&quot;ickes&quot;,&quot;score&quot;:3,&quot;comment&quot;:&quot;nice&quot;},  
+      {&quot;name&quot;:&quot;xl&quot;,&quot;score&quot;:4,&quot;comment&quot;:&quot;nice&quot;},  
+      {&quot;name&quot;:&quot;eksliang&quot;,&quot;score&quot;:5,&quot;comment&quot;:&quot;nice&quot;},  
+      {&quot;name&quot;:&quot;ickes&quot;,&quot;score&quot;:6,&quot;comment&quot;:&quot;nice&quot;}  
+    ]  
+})
+
+&amp;gt;db.blog.ensureIndex({&quot;comments.score&quot;:1})  
+
+&amp;gt;db.blog.find({&quot;comments.score&quot;: {&quot;$gt&quot;: 5}})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;注意：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;对数组建立索引，实际上是对数组的每个元素建立索引，要注意的是我们无法像嵌套文档一样对整个数组建立索引，而是每个元素，因此它要比单值索引代价要高。&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;在数组上建立的索引并不包含任何位置信息：无法使用数组索引查找特定位置的数组元素，比如”comments.4”.&lt;/li&gt;
+  &lt;li&gt;一个索引中数组字段最多只能有一个。这是为了避免在复合索引中索引条目爆炸性增长。&lt;/li&gt;
+  &lt;li&gt;对于某个索引的键，如果这个键在某个文档中是一个数组，那么这个索引就会标记为多键索引。可以从explain()的输出信息中看到一个索引是否为多键索引。如果是多键索引,那么”isMultikey”字段的值就会为true。索引只要被标记为多键索引，就无法再变成非多键索引，即使索引的键从文档中删除也不行。唯一的办法就是删除重建。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;section-13&quot;&gt;五.索引取舍&lt;/h1&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;结果集在原集合中占的比例越大，索引的速度就越慢，因为使用索引需要进行两次查找，&lt;strong&gt;一次是查找索引条目，一次是根据索引指针去查找相应的文档。&lt;/strong&gt;而全表扫描只需要进行一次查找：查找文档。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;索引通常适用的情况&lt;/th&gt;
+      &lt;th&gt;全表扫描适用情况&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;集合较大&lt;/td&gt;
+      &lt;td&gt;集合较小&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;文档较大&lt;/td&gt;
+      &lt;td&gt;文档较小&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;选择性查询&lt;/td&gt;
+      &lt;td&gt;非选择性查询&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h1 id=&quot;section-14&quot;&gt;六.索引管理&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;索引只创建一次，重复创建则无反应&lt;/li&gt;
+  &lt;li&gt;所有索引都存储在system.indexes集合中&lt;/li&gt;
+  &lt;li&gt;db.collection.getIndexes() 查看指定集合上的所有索引信息&lt;/li&gt;
+  &lt;li&gt;索引顺序很重要， {x: 1, y: 1} 与{y: 1, x: 1}索引不同&lt;/li&gt;
+  &lt;li&gt;索引名称默认形式是：keyname1_dir1_keyname2_dir2_… keyname为索引的键，dir为索引的方向&lt;/li&gt;
+  &lt;li&gt;可以在ensureIndex中添加{“name”: “索引别名”}来标识索引&lt;/li&gt;
+  &lt;li&gt;dropIndex()删除索引， db.user.dropIndex({“age”: 1}) == db.user.dropIndex(“age_1”)&lt;/li&gt;
+  &lt;li&gt;在创建索引时指定background选项在后台创建索引，异步处理，不会阻塞请求，当有请求是则索引创建动作暂停下来；但比前台创建索引慢得多。&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+        <pubDate>Wed, 06 Jan 2016 00:00:00 +0800</pubDate>
+        <link>http://universus.cn/mongodb/2016/01/06/mongo-index/</link>
+        <guid isPermaLink="true">http://universus.cn/mongodb/2016/01/06/mongo-index/</guid>
+        
+        <category>mongodb</category>
+        
+        
+        <category>mongodb</category>
+        
+      </item>
+    
+      <item>
+        <title>Python 数据结构和算法小结</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;“只要你还在担心别人会怎么看你，他们就能奴役你；只有你再也不用从自身之外寻求肯定，才能成为自己的主人。” – 尼尔·唐纳德·沃尔什&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;内置数据结构，包括列表，集合以及字典等，对于理论性学习(算法，数据结构)不是一蹴而就的，我个人总结对Python数据结构和算法的学习流程如下(这也是我下一步要学习的)：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;打牢基础，熟悉内置数据结构的使用方法，在《Python核心编程》和《Python 学习手册》都有详尽的解释说明。&lt;/li&gt;
+  &lt;li&gt;熟悉常用的算法，如查询，排序和过滤等，可参考《Python Cookbook》和《啊哈算法》(C语言实现)，&lt;a href=&quot;http://www.brpreiss.com/&quot;&gt;Data Structures and Algorithms with Object-Oriented Design Patterns in Python&lt;/a&gt;值得好好研究研究；&lt;a href=&quot;http://interactivepython.org/courselib/static/pythonds/index.html&quot;&gt;Problem Solving with Algorithms and Data Structures&lt;/a&gt;是一本nice的python版本算法电子书；&lt;a href=&quot;http://link.springer.com/book/10.1007%2F978-1-4302-3238-4&quot;&gt;《Python Algorithms: Mastering Basic Algorithms in the Python Language》&lt;/a&gt;国内不知道有没有翻译出书，售价￥539.00有点吓人。博客系列&lt;a href=&quot;http://wuchong.me/blog/2014/02/09/algorithm-sort-summary/&quot;&gt;经典排序算法总结与实现&lt;/a&gt;和&lt;a href=&quot;https://github.com/qiwsir/algorithm&quot;&gt;qiwsir/algorithm&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;熟悉Python常用的库，如：&lt;code&gt;collections&lt;/code&gt;,&lt;code&gt;heapq&lt;/code&gt;,&lt;code&gt;operator&lt;/code&gt;等&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;一.数据结构&lt;/h1&gt;
+&lt;p&gt;这节算是对《Python Cookbook》第一章的总结，关于例子，已经放在github上。&lt;a href=&quot;https://github.com/BeginMan/pytool/tree/master/datastruct&quot;&gt;pytool.datastruct&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;section-1&quot;&gt;1.1 解压&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;解压赋值可以用在任何可迭代对象上面，而不仅仅是列表或者元组。 包括字符串，文件对象，迭代器和生成器。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; data = [ &#39;ACME&#39;, 50, 91.1, (2012, 12, 21) ]
+&amp;gt;&amp;gt;&amp;gt; name, shares, price, date = data
+&amp;gt;&amp;gt;&amp;gt; name
+&#39;ACME&#39;
+&amp;gt;&amp;gt;&amp;gt; date
+(2012, 12, 21)
+&amp;gt;&amp;gt;&amp;gt; name, shares, price, (year, mon, day) = data
+
+&amp;gt;&amp;gt;&amp;gt; s = &#39;Hello&#39;
+&amp;gt;&amp;gt;&amp;gt; a, b, c, d, e = s
+&amp;gt;&amp;gt;&amp;gt; a
+&#39;H&#39;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;可以使用不常用的，如&lt;code&gt;_&lt;/code&gt;做占位变量名，丢弃其他的值。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;1.2 变长的处理&lt;/h2&gt;
+
+&lt;p&gt;当我们对元素的个数不确定时，一定要记住用&lt;code&gt;*&lt;/code&gt;或&lt;code&gt;**&lt;/code&gt;, &lt;strong&gt;星号表达式在迭代元素为可变长元组的序列时是很有用的&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;def drop_first_last(grades):
+    first, *middle, last = grades
+    return avg(middle)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;collections&quot;&gt;1.3 你应该掌握collections模块&lt;/h2&gt;
+&lt;p&gt;看这里我之前总结的&lt;a href=&quot;https://github.com/BeginMan/pythonStdlib/blob/master/collections.md&quot;&gt;pythonStdlib/collections.md&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;n&quot;&gt;1.4 最大和最小N个元素&lt;/h2&gt;
+
+&lt;p&gt;三种方式：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;code&gt;heapq&lt;/code&gt;模块两个函数：&lt;code&gt;nlargest()&lt;/code&gt; 和 &lt;code&gt;nsmallest()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;max()&lt;/code&gt;和&lt;code&gt;min()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;排序后处理&lt;code&gt;sorted(items)[:N]&lt;/code&gt;或&lt;code&gt;sorted(items)[-N:]&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;max()&lt;/code&gt;,&lt;code&gt;min()&lt;/code&gt;,&lt;code&gt;sum()&lt;/code&gt;,&lt;code&gt;sorted()&lt;/code&gt;都可以有一个关键字参数 key ，可以传入一个 callable 对象给它&lt;br /&gt;
+这个 callable 对象对每个传入的对象返回一个值，这个值会被用来处理这些对象。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;可参考这些&lt;a href=&quot;https://github.com/BeginMan/pytool/blob/master/datastruct/finding-the-largest-or-smallest-N-items.py&quot;&gt;示例代码 finding-the-largest-or-smallest-N-items.py&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;heapq&quot;&gt;1.5 你需要掌握heapq模块&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/qiwsir/algorithm/blob/master/heapq.md&quot;&gt;关于heapq模块参考&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;下面代码&lt;a href=&quot;https://github.com/BeginMan/pytool/blob/master/datastruct/Implementing-a-Priority-Queue.py&quot;&gt;利用heapq模块实现一个优先级队列&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-3&quot;&gt;1.6 字典初始化&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;collections模块&lt;code&gt;defaultdict&lt;/code&gt;来始化每个 key 刚开始对应的值,也可通过&lt;code&gt;setdefault&lt;/code&gt;来处理。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;可通过&lt;a href=&quot;https://github.com/BeginMan/pytool/blob/master/datastruct/mapping-keys-to-multiple-values-in-a-dictionary.py&quot;&gt;如下代码&lt;/a&gt;演示&lt;/p&gt;
+
+&lt;h2 id=&quot;section-4&quot;&gt;1.7 字典排序&lt;/h2&gt;
+&lt;p&gt;为了能控制一个字典中元素的顺序，你可以使用 collections 模块中的 &lt;code&gt;OrderedDict&lt;/code&gt; 类.&lt;a href=&quot;https://github.com/BeginMan/pytool/blob/master/datastruct/sorting-a-list-of-dictionaries-by-a-common-key.py&quot;&gt;实例1&lt;/a&gt;,对于不支持原生比较的对象的排序，可&lt;a href=&quot;https://github.com/BeginMan/pytool/blob/master/datastruct/sorting-objects-without-native-comparison-support.py&quot;&gt;这样处理&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-5&quot;&gt;1.8 字典运算&lt;/h2&gt;
+&lt;p&gt;字典的运算,如求最小值、最大值、排序等最佳解决方案是&lt;code&gt;zip&lt;/code&gt;化后再操作，&lt;code&gt;keys()&lt;/code&gt;和&lt;code&gt;values()&lt;/code&gt;的结果可进行集合并、交、差运算，可看&lt;a href=&quot;https://github.com/BeginMan/pytool/blob/master/datastruct/calculating-with-dictionaries.py&quot;&gt;如下代码1&lt;/a&gt;和&lt;a href=&quot;https://github.com/BeginMan/pytool/blob/master/datastruct/finding-commonalities-in-two-dictionaries.py&quot;&gt;代码2&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-6&quot;&gt;1.9 字典分组&lt;/h2&gt;
+&lt;p&gt;需要排序后配合itertools模块的&lt;code&gt;groupby()&lt;/code&gt;函数来处理,&lt;a href=&quot;https://github.com/BeginMan/pytool/blob/master/datastruct/grouping-records-together-based-on-a-field.py&quot;&gt;实例代码1&lt;/a&gt;,&lt;a href=&quot;https://github.com/BeginMan/pytool/blob/master/datastruct/dict_group.py&quot;&gt;实例代码2&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-7&quot;&gt;1.10 过滤元素&lt;/h2&gt;
+&lt;p&gt;有如下处理方式：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;列表推导&lt;/li&gt;
+  &lt;li&gt;生成器表达式迭代过滤&lt;/li&gt;
+  &lt;li&gt;内建&lt;code&gt;filter()&lt;/code&gt;函数&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;itertools.compress()&lt;/code&gt; 过滤工具&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;可参考&lt;a href=&quot;http://python3-cookbook.readthedocs.org/zh_CN/latest/c01/p16_filter_sequence_elements.html&quot;&gt;1.16 过滤序列元素&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-8&quot;&gt;1.11 映射名称到序列元素&lt;/h2&gt;
+&lt;p&gt;可通过&lt;code&gt;collections.namedtuple()&lt;/code&gt;构建键值对的映射，更加友好地处理数据。可&lt;a href=&quot;http://python3-cookbook.readthedocs.org/zh_CN/latest/c01/p18_map_names_to_sequence_elements.html&quot;&gt;参考这里&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Tue, 05 Jan 2016 00:00:00 +0800</pubDate>
+        <link>http://universus.cn/python/2016/01/05/python-data-structures-and-algorithms/</link>
+        <guid isPermaLink="true">http://universus.cn/python/2016/01/05/python-data-structures-and-algorithms/</guid>
+        
+        <category>python</category>
+        
+        
+        <category>python</category>
+        
+      </item>
+    
+      <item>
+        <title>Mongodb常用查询</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;大图是我个人编程环境。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;不胡思乱想就是禅，一旦你明白这点，走路，站着，坐着或躺着，你所做的一切都是禅。 –达摩(Red Pine, 1987)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&quot;summary&quot;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;大纲之.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;http://beginman.cn/mongodb/2016/01/05/mongo-query/#find&quot;&gt;find基础&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://beginman.cn/mongodb/2016/01/05/mongo-query/#section&quot;&gt;查询条件&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://beginman.cn/mongodb/2016/01/05/mongo-query/#section-1&quot;&gt;特定类型的查询&lt;/a&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;http://beginman.cn/mongodb/2016/01/05/mongo-query/#null&quot;&gt;null&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;http://beginman.cn/mongodb/2016/01/05/mongo-query/#section-2&quot;&gt;正则&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;http://beginman.cn/mongodb/2016/01/05/mongo-query/#section-3&quot;&gt;数组&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;http://beginman.cn/mongodb/2016/01/05/mongo-query/#section-4&quot;&gt;内嵌文档&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://beginman.cn/mongodb/2016/01/05/mongo-query/#where&quot;&gt;$where查询&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://beginman.cn/mongodb/2016/01/05/mongo-query/#section-5&quot;&gt;游标&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h1 id=&quot;find&quot;&gt;一.find基础&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;find( {} ) 等于 find(), &lt;code&gt;{}&lt;/code&gt;表示全部，默认之&lt;/li&gt;
+  &lt;li&gt;find( { key: value, …. } ) 指定条件查询&lt;/li&gt;
+  &lt;li&gt;find( {}, { “key”:1,…} ) 第二个参数来指定需要返回的键，默认是全部。&lt;strong&gt;指定返回可节省解码，传输时间和内存消耗。&lt;/strong&gt;，默认情况&lt;code&gt;_id&lt;/code&gt;总是返回，可显式{_id: 0}将其踢掉&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;二.查询条件&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;find&lt;/code&gt;,&lt;code&gt;findOne&lt;/code&gt;用起来还是挺简单的，难就难在查询条件上。可通过文档查看详细&lt;a href=&quot;https://docs.mongodb.org/v3.0/reference/operator/query/&quot;&gt;&lt;strong&gt;Query and Projection Operators&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;永远要记住：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;查询条件是在键(key)的基础上，{“key”: {查询条件..}}&lt;/li&gt;
+  &lt;li&gt;对于多条件，如&lt;code&gt;$in&lt;/code&gt;,&lt;code&gt;$nin&lt;/code&gt;,&lt;code&gt;$or&lt;/code&gt;,&lt;code&gt;$and&lt;/code&gt;等需要用数组包起来，如db.foo.find({“$or”: [{“uid”: 1001}, {“uname”: “beginman”, “pid”: {“$in”: [1,2,3,4]}}]})&lt;/li&gt;
+  &lt;li&gt;对于元条件，如&lt;code&gt;$not&lt;/code&gt;,&lt;code&gt;$or&lt;/code&gt;,&lt;code&gt;$and&lt;/code&gt;可以用在任何条件上,也用于外层文档 如： db.foo.find({“uid”: {“$not”: {“$mod”: [5, 1]}}})&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;对比上一节的&lt;code&gt;$&lt;/code&gt;更新操作，如&lt;code&gt;$inc&lt;/code&gt;用在外层文档的键, 条件语义如：&lt;code&gt;$lt&lt;/code&gt;用在内层文档，条件语句是内层文档的键，而修改器则是外层文档的键。&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;一个键有任意多个条件，但一个键不能有任意多个更新修改器&lt;/strong&gt;，也就是说不能同时存在：{“$inc”: {“age”: 1}, “$set”: {“age”: 10}}&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;section-1&quot;&gt;三.特定类型的查询&lt;/h1&gt;
+&lt;p&gt;针对特殊的类型如null,数组，内嵌等处理。&lt;/p&gt;
+
+&lt;h2 id=&quot;null&quot;&gt;3.1 null&lt;/h2&gt;
+&lt;p&gt;也可通过上述方式匹配null自身，但是&lt;strong&gt;null不仅会匹配null自身还会匹配不包括这个键的文档&lt;/strong&gt;，如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.foo.find()
+{ &quot;_id&quot; : ObjectId(&quot;568bdc9a0c45f69abd83005c&quot;), &quot;y&quot; : null }
+{ &quot;_id&quot; : ObjectId(&quot;568bdc9c0c45f69abd83005d&quot;), &quot;y&quot; : 1 }
+{ &quot;_id&quot; : ObjectId(&quot;568bdca10c45f69abd83005e&quot;), &quot;z&quot; : 3 }
+
+&amp;gt; db.foo.find({y: null})
+{ &quot;_id&quot; : ObjectId(&quot;568bdc9a0c45f69abd83005c&quot;), &quot;y&quot; : null }
+{ &quot;_id&quot; : ObjectId(&quot;568bdca10c45f69abd83005e&quot;), &quot;z&quot; : 3 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;虽然查询到了y为null的情况但是也查到了键不为y的情况，显然这不是我们想要的。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;如果仅想匹配键值为null的文档，则既要检查该键的值是否为null，还要通过&lt;code&gt;$exists&lt;/code&gt;条件判定键值已存在。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.foo.find({&#39;y&#39;: {&#39;$eq&#39;: null, &#39;$exists&#39;: true}})
+{ &quot;_id&quot; : ObjectId(&quot;568bdc9a0c45f69abd83005c&quot;), &quot;y&quot; : null }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;3.2 正则表达式&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;mongodb使用perl兼容的正则表达式(PCRE)库来匹配正则表达式，在使用前在js shell中先测试下你的正则是否行得通。正则表达式也会匹配自身的。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.people.find({&#39;name&#39;: /^j/})
+{ &quot;_id&quot; : ObjectId(&quot;568a22b43487d056d75967b1&quot;), &quot;name&quot; : &quot;jack&quot;, &quot;score&quot; : 10 }
+
+&amp;gt; db.people.find({&#39;name&#39;: /^j/i})
+{ &quot;_id&quot; : ObjectId(&quot;568a227a3487d056d75967b0&quot;), &quot;name&quot; : &quot;Jack&quot;, &quot;score&quot; : 11 }
+{ &quot;_id&quot; : ObjectId(&quot;568a22b43487d056d75967b1&quot;), &quot;name&quot; : &quot;jack&quot;, &quot;score&quot; : 10 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;section-3&quot;&gt;3.3 数组&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;(1).查询数组元素与查询标量值是一样的&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.foo.find({&quot;fruit&quot;: &quot;apple&quot;})
+{ &quot;_id&quot; : ObjectId(&quot;568bdf460c45f69abd83005f&quot;), &quot;fruit&quot; : [ &quot;apple&quot;, &quot;banna&quot;, &quot;peach&quot; ] }
+{ &quot;_id&quot; : ObjectId(&quot;568bdf990c45f69abd830060&quot;), &quot;fruit&quot; : [ &quot;apple&quot;, &quot;tomato&quot; ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;相当于查询：{‘fruit’: ‘apple’, ‘fruit’: ‘banna’, …}&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;(2).如果我们全部匹配则需要全部将数组元素写出且顺序要一致&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.foo.find({&quot;fruit&quot;: [ &quot;apple&quot;, &quot;banna&quot; ]})
+&amp;gt; db.foo.find({&quot;fruit&quot;: [ &quot;apple&quot;, &quot;peach&quot;, &quot;banna&quot; ]})
+&amp;gt; db.foo.find({&quot;fruit&quot;: [ &quot;apple&quot;, &quot;banna&quot;, &quot;peach&quot; ]})
+{ &quot;_id&quot; : ObjectId(&quot;568bdf460c45f69abd83005f&quot;), &quot;fruit&quot; : [ &quot;apple&quot;, &quot;banna&quot;, &quot;peach&quot; ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;(3).如果要查询数组特定位置的元素，使用key.index语法指定下标&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.foo.find({&quot;fruit.1&quot;: &quot;tomato&quot;})
+{ &quot;_id&quot; : ObjectId(&quot;568bdf990c45f69abd830060&quot;), &quot;fruit&quot; : [ &quot;apple&quot;, &quot;tomato&quot; ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;(4).&lt;code&gt;$all&lt;/code&gt;通过多个元素匹配数组&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//查询所有含apple的文档
+&amp;gt; db.foo.find({&quot;fruit&quot;: {&quot;$all&quot;: [&quot;apple&quot;]}})
+{ &quot;_id&quot; : ObjectId(&quot;568bdf460c45f69abd83005f&quot;), &quot;fruit&quot; : [ &quot;apple&quot;, &quot;banna&quot;, &quot;peach&quot; ] }
+{ &quot;_id&quot; : ObjectId(&quot;568bdf990c45f69abd830060&quot;), &quot;fruit&quot; : [ &quot;apple&quot;, &quot;tomato&quot; ] }
+{ &quot;_id&quot; : ObjectId(&quot;568be1a50c45f69abd830061&quot;), &quot;fruit&quot; : [ &quot;apple&quot;, &quot;tomato&quot;, &quot;banna&quot; ] }
+
+//查询既有apple又有banna的文档
+&amp;gt; db.foo.find({&quot;fruit&quot;: {&quot;$all&quot;: [&quot;apple&quot;, &quot;banna&quot;]}})
+{ &quot;_id&quot; : ObjectId(&quot;568bdf460c45f69abd83005f&quot;), &quot;fruit&quot; : [ &quot;apple&quot;, &quot;banna&quot;, &quot;peach&quot; ] }
+{ &quot;_id&quot; : ObjectId(&quot;568be1a50c45f69abd830061&quot;), &quot;fruit&quot; : [ &quot;apple&quot;, &quot;tomato&quot;, &quot;banna&quot; ] }
+
+&amp;gt; db.foo.find({&quot;fruit&quot;: {&quot;$all&quot;: [&quot;apple&quot;, &quot;peach&quot;]}})
+{ &quot;_id&quot; : ObjectId(&quot;568bdf460c45f69abd83005f&quot;), &quot;fruit&quot; : [ &quot;apple&quot;, &quot;banna&quot;, &quot;peach&quot; ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这里顺序无关紧要。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;(5).&lt;code&gt;$size&lt;/code&gt;查询特定长度的数组&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.foo.find({&quot;fruit&quot;: {&quot;$size&quot;: 2}})
+{ &quot;_id&quot; : ObjectId(&quot;568bdf990c45f69abd830060&quot;), &quot;fruit&quot; : [ &quot;apple&quot;, &quot;tomato&quot; ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;但是并不能与查询条件如$lt一块使用，替代方案是在插入数组的同时插入一个冗余的字段如arr_size, 每次操作数组就更新arr_size,这样就能：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.foo.find({&quot;arr_size&quot;: {&quot;$lt&quot;: 3}})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;(6).&lt;code&gt;$slice&lt;/code&gt;操作符进行切片&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;因为find第二个参数为指定返回，如数组则返回全部元素，可通过&lt;code&gt;$slice&lt;/code&gt;进行切片返回部分元素。如返回博客前10条评论：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.blog.find(criteria, {&quot;_id&quot;:0, &quot;comments&quot;: {&quot;$slice&quot;: 10}})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;如果返回后10条，则&lt;code&gt;-10&lt;/code&gt;即可。如果获取最后一条则为&lt;code&gt;-1&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;也可指定偏移量，如[10, 20]&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;(7).返回一个匹配的数组元素&lt;/strong&gt;&lt;br /&gt;
+&lt;code&gt;$slice&lt;/code&gt;是在知道数组下标的情况下很好用，如果不知道下标但需要返回一个相匹配的任意一个数组元素，则通过&lt;code&gt;$&lt;/code&gt;操作符得到一个匹配的元素。如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; db.foo.find({&quot;comments.name&quot;: &quot;jack&quot;}).pretty()
+{
+	&quot;_id&quot; : ObjectId(&quot;568c540c0c45f69abd830062&quot;),
+	&quot;post&quot; : 1,
+	&quot;comments&quot; : [
+		{
+			&quot;name&quot; : &quot;bob&quot;,
+			&quot;uid&quot; : 1001,
+			&quot;content&quot; : &quot;good&quot;
+		},
+		{
+			&quot;name&quot; : &quot;jack&quot;,
+			&quot;uid&quot; : 1002,
+			&quot;content&quot; : &quot;nice&quot;
+		},
+		{
+			&quot;name&quot; : &quot;jack&quot;,
+			&quot;uid&quot; : 1002,
+			&quot;content&quot; : &quot;I like it&quot;
+		}
+	]
+}
+
+//只返回第一个匹配的文档
+&amp;gt; db.foo.find({&quot;comments.name&quot;: &quot;jack&quot;}, {&quot;comments.$&quot;: 1}).pretty()
+{
+	&quot;_id&quot; : ObjectId(&quot;568c540c0c45f69abd830062&quot;),
+	&quot;comments&quot; : [
+		{
+			&quot;name&quot; : &quot;jack&quot;,
+			&quot;uid&quot; : 1002,
+			&quot;content&quot; : &quot;nice&quot;
+		}
+	]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;(8).数组和范围查询的相互作用&lt;/strong&gt;&lt;br /&gt;
+在使用&lt;code&gt;$gt&lt;/code&gt;,&lt;code&gt;$lt&lt;/code&gt;等范围查询时，往往数组还会对其产生作用，看下面实例：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//假如有如下文档
+{ &quot;_id&quot; : ObjectId(&quot;568c56120c45f69abd830063&quot;), &quot;x&quot; : 5 }
+{ &quot;_id&quot; : ObjectId(&quot;568c56150c45f69abd830064&quot;), &quot;x&quot; : 15 }
+{ &quot;_id&quot; : ObjectId(&quot;568c56170c45f69abd830065&quot;), &quot;x&quot; : 25 }
+{ &quot;_id&quot; : ObjectId(&quot;568c561e0c45f69abd830066&quot;), &quot;x&quot; : [ 5, 25 ] }
+
+//查询x键值位于10~20之间的文档
+&amp;gt; db.foo.find({&quot;x&quot; : {&quot;$gt&quot;: 10, &quot;$lt&quot;: 20}})
+{ &quot;_id&quot; : ObjectId(&quot;568c56150c45f69abd830064&quot;), &quot;x&quot; : 15 }
+{ &quot;_id&quot; : ObjectId(&quot;568c561e0c45f69abd830066&quot;), &quot;x&quot; : [ 5, 25 ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;上面查询结果竟然有数组，因为25与第一个查询条件大于10匹配， 5与第二个查询条件小于20匹配，所以说&lt;strong&gt;数组使用范围查询没有用：范围会匹配任意多元数组。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-4&quot;&gt;3.4 内嵌文档&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;有两种方法可以查询内嵌文档&lt;/strong&gt;：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;查询整个文档（精准匹配且与顺序有关）&lt;/li&gt;
+  &lt;li&gt;只针对其键值对查询（用点表示法查询内嵌文档的键）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;推荐第二种：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;db.people.find({&quot;name.first&quot;: &quot;Joe&quot;, &quot;name.last&quot;: &quot;Schmoe&quot;})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;注意：&lt;strong&gt;查询文档可以包括&lt;code&gt;点&lt;/code&gt;来表达“进入内嵌文档内部”的意思，所以该文档&lt;code&gt;键&lt;/code&gt;不能包含&lt;code&gt;.&lt;/code&gt;,如URL作为键时我们就应该将&lt;code&gt;.&lt;/code&gt;进行全局替换。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;要注意的是对于查询多个条件可能存在问题，如：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// 查询所有5分评论
+{&quot;comment.author&quot;: &quot;Joe&quot;, &quot;comments.score&quot;: {&quot;$gte&quot;: 5}}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;则符合author和score条件的可能不是同一条评论，他们之间是或的关系。如果要正确的指定一组条件，而不必指定每个键，需要&lt;code&gt;$elemMatch&lt;/code&gt;对限定条件进行分组，仅当需要对一个内嵌文档的多个键操作时才会用到：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;db.blog.find({&quot;comments&quot;: {&quot;$elemMatch&quot;: {&quot;author&quot;: &quot;Joe&quot;,
+				&quot;score&quot;: {&quot;$gte&quot;: 5}}}})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&quot;where&quot;&gt;四.$where查询&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;当使用键值对不好查询时，你应该想到&lt;code&gt;$where&lt;/code&gt;, 它可以在查询中执行任意的Js, 虽然强大但也危险，应该严格限制。&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;$where查询一般用的很少，因为它查询很慢，每个文档都要从BSON转换为Js对象再操作，且不能使用索引。&lt;/p&gt;
+
+&lt;p&gt;服务器上执行js是要注意安全性，与关系型数据库的注入攻击类似，我们应该在运行mongod时指定&lt;code&gt;--noscripting&lt;/code&gt;关闭js的执行，以保证安全。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-5&quot;&gt;五.游标&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;数据库使用游标返回find执行结果， 如果要迭代则使用游标的&lt;code&gt;next()&lt;/code&gt;方法&lt;/strong&gt;：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var cursor = db.foo.find();
+
+//cursor.hasNext()检查是否有后续结果存在
+&amp;gt; while(cursor.hasNext()){
+... obj = cursor.next();		// cursor.next()获取
+... //do stuff
+... }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;游标还实现了Js的迭代器接口，可以在&lt;code&gt;forEach&lt;/code&gt;循环中使用：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; cursor.forEach(function(x) {print(x)})
+[object Object]
+....
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;调用&lt;code&gt;find&lt;/code&gt;时，shell并不立即查询数据库，而是等待真正开始要求获得结果时才发送查询，这样执行之前可以给查询附加额外的选项；几乎游标对象的每个方法都会返回游标本身，则可按任意顺序组成方法链&lt;/strong&gt;， 如下几种表达式是等价的：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;var cursor = db.foo.find().sort({&quot;x&quot;: 1}).limit(1).skip(10)
+&amp;gt;var cursor = db.foo.find().limit(1).sort({&quot;x&quot;: 1}).skip(10)
+&amp;gt;var cursor = db.foo.find().skip(10).limit(1).sort({&quot;x&quot;: 1})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;此时查询还没有真正执行，所以这些函数都是构造查询，如果执行： &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cursor.hasNext()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;则开始查询。&lt;/p&gt;
+
+&lt;p&gt;注意游标用了后要&lt;strong&gt;尽快释放&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Over~ 更详解则查看文档。&lt;/p&gt;
+
+</description>
+        <pubDate>Tue, 05 Jan 2016 00:00:00 +0800</pubDate>
+        <link>http://universus.cn/mongodb/2016/01/05/mongo-query/</link>
+        <guid isPermaLink="true">http://universus.cn/mongodb/2016/01/05/mongo-query/</guid>
+        
+        <category>mongodb</category>
+        
+        
+        <category>mongodb</category>
+        
+      </item>
+    
+  </channel>
+</rss>

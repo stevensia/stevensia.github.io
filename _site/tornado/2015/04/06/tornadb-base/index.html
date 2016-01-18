@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="个人技术总结，读书笔记，心得等 | 这里是 Stevensia的个人博客，与君共勉。">
+    <meta name="keyword"  content="Python, Steven的博客, Steven Blog, linux">
+    <link rel="shortcut icon" href="img/favicon.ico">
+
+    <title>tornadb源码分析 - Steven's Blog!</title>
+
+    <link rel="canonical" href="http://universus.cn/tornado/2015/04/06/tornadb-base/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Steven's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About me</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/bigshows/coding1.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/bigshows/coding1.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#tornado" title="tornado">tornado</a>
+                        
+                    </div>
+                    <h1>tornadb源码分析</h1>
+                    
+                    
+                    <h2 class="subheading"></h2>
+                    
+                    <span class="meta">Posted by Steven's Blog on April 6, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-9 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<p>tornado没有相应的ORM,基本通过tornadb模块，在旧版本原先是tornado.database.，它们都是轻量级的包装mysqldb.</p>
+
+<p>在项目中由于tornado版本新旧的问题，我们可以友好的处理tornadb.</p>
+
+<pre><code>try:
+    import torndb as db
+except:
+    import tornado.database as db
+</code></pre>
+
+<p>关于tornadb的使用其实挺简单的，会用mysqldb就会用它。所以最好读一下tornadb的源码，仅仅两三百行。<a href="http://torndb.readthedocs.org/en/latest/_modules/torndb.html#Connection">Source code for torndb</a></p>
+
+<!--more-->
+
+<p><strong>连接mysql：</strong></p>
+
+<pre><code>class torndb.Connection(
+    host, 
+    database, 
+    user=None, 
+    password=None, 
+    max_idle_time=25200, //用来配置连接的最大空闲时间
+connect_timeout=0,       // 连接超时时间
+time_zone='+0:00',       // 设置时区init_command=('SET time_zone = "%s"' % time_zone)
+charset='utf8',         
+sql_mode='TRADITIONAL'  //通过设置sql_mode变量更改模式
+)
+</code></pre>
+
+<p><code>max_idle_time</code>,配置连接的最大空闲时间，当超过该时间则重新连接。</p>
+
+<pre><code>def _ensure_connected(self):
+    """
+    MySQL的默认情况下关闭客户端连接是闲置8小时后，但客户端库不报告这一事实直到尝试执行一个查询和失败。
+    防止这种情况下，通过抢先关闭并重新打开连接如果它已经闲置太久（7小时默认情况下）。
+    """
+    if (self._db is None or
+        (time.time() - self._last_use_time &gt; self.max_idle_time)):
+        self.reconnect()
+    self._last_use_time = time.time()
+</code></pre>
+
+<h2>一.常用方法</h2>
+
+<h3>1.close()：关闭数据库连接</h3>
+
+<pre><code>def close(self):
+    """Closes this database connection."""
+    if getattr(self, "_db", None) is not None:
+        self._db.close()
+        self._db = None
+</code></pre>
+
+<h3>2.reconnect():重新连接数据库</h3>
+
+<pre><code>def reconnect(self):
+    """Closes the existing database connection and re-opens it."""
+    self.close()
+    self._db = MySQLdb.connect(**self._db_args)
+    self._db.autocommit(True)
+</code></pre>
+
+<h3>3.iter(query, *parameters, **kwparameters)：通过给定的查询和参数返回一个迭代器</h3>
+
+<pre><code>def iter(self, query, *parameters, **kwparameters):
+    self._ensure_connected()    #确保数据库处于连接状态
+
+    #取大的结果集时一定使用SSCursor
+    cursor = MySQLdb.cursors.SSCursor(self._db)
+    try:
+        self._execute(cursor, query, parameters, kwparameters)
+        column_names = [d[0] for d in cursor.description]
+        for row in cursor:
+            yield Row(zip(column_names, row))  #yield返回生成器
+    finally:
+        cursor.close()
+</code></pre>
+
+<p>iter生成生成器函数，对于性能上肯定比下面的query好，这里使用了mysqldb的SSCurosr，当取大的结果集的时候，使用SSCurosr能避免客户端占用大量内存，使用迭代器而不用fetchall.</p>
+
+<p>如下在mysqldb中体现：</p>
+
+<pre><code>import MySQLdb
+import MySQLdb.cursors
+
+connection = MySQLdb.connect(
+    host=host, port=port, user=username, passwd=password, db=database, 
+    cursorclass=MySQLdb.cursors.SSCursor) # put the cursorclass here
+cursor = connection.cursor()
+
+cursor.execute(query)
+for row in cursor:
+    print(row)
+</code></pre>
+
+<p>这样执行execute就能生成iterator结果集</p>
+
+<h3>4.query(query, *parameters, **kwparameters):通过给定查询和参数返回一列数据。</h3>
+
+<pre><code>def query(self, query, *parameters, **kwparameters):
+    cursor = self._cursor()
+    try:
+        self._execute(cursor, query, parameters, kwparameters)
+        column_names = [d[0] for d in cursor.description]
+        #与上面的iter()最大区别就是它返回所有数据
+        return [Row(itertools.izip(column_names, row)) for row in cursor]
+    finally:
+        cursor.close()
+</code></pre>
+
+<h3>5.get(query, *parameters, **kwparameters)：返回单行数据</h3>
+
+<p>如果没有数据则返回None.如果多行则触发异常。这点就像django ORM的 get和filter的区别一样。</p>
+
+<pre><code>def get(self, query, *parameters, **kwparameters):
+    rows = self.query(query, *parameters, **kwparameters)
+    if not rows:
+        return None
+    elif len(rows) &gt; 1:
+        raise Exception("Multiple rows returned for Database.get() query")
+    else:
+        return rows[0]
+</code></pre>
+
+<p>当然返回单行还是多行依赖于你的查询语句。</p>
+
+<h3>6.execute(query, *parameters, **kwparameters)：执行查询语句并返回最后一条id</h3>
+
+<pre><code>def execute(self, query, *parameters, **kwparameters):
+    """Executes the given query, returning the lastrowid from the query."""
+    #下面方法
+    return self.execute_lastrowid(query, *parameters, **kwparameters)
+</code></pre>
+
+<h3>7.execute_lastrowid(query, *parameters, **kwparameters): 执行查询并返回最后一条的id</h3>
+
+<pre><code>    def execute_lastrowid(self, query, *parameters, **kwparameters):
+    """Executes the given query, returning the lastrowid from the query."""
+    cursor = self._cursor()
+    try:
+        self._execute(cursor, query, parameters, kwparameters)
+        return cursor.lastrowid
+    finally:
+        cursor.close()
+</code></pre>
+
+<h3>8.execute_rowcount(query, *parameters, **kwparameters):执行查询并返回最后影响的行数</h3>
+
+<pre><code>def execute_rowcount(self, query, *parameters, **kwparameters):
+    """Executes the given query, returning the rowcount from the query."""
+    cursor = self._cursor()
+    try:
+        self._execute(cursor, query, parameters, kwparameters)
+        return cursor.rowcount
+    finally:
+        cursor.close()
+</code></pre>
+
+<h3>9.executemany(query, parameters)：通过所有给定参数序列来执行查询</h3>
+
+<pre><code>def executemany(self, query, parameters):
+    """Executes the given query against all the given param sequences.
+
+    We return the lastrowid from the query.
+    """
+    return self.executemany_lastrowid(query, parameters)
+</code></pre>
+
+<h3>10.executemany_lastrowid(query, parameters):同上</h3>
+
+<pre><code>def executemany_lastrowid(self, query, parameters):
+    """Executes the given query against all the given param sequences.
+
+    We return the lastrowid from the query.
+    """
+    cursor = self._cursor()
+    try:
+        cursor.executemany(query, parameters)
+        return cursor.lastrowid
+    finally:
+        cursor.close()
+</code></pre>
+
+<p>上述两个方法都是调用<code>cursor.executemany()</code>来进行批量插入数据。</p>
+
+<pre><code>cursor.executemany(  
+  """INSERT INTO breakfast (name, spam, eggs, sausage, price) 
+  VALUES (%s, %s, %s, %s, %s)""",  
+  [  
+  ("Spam and Sausage Lover's Plate", 5, 1, 8, 7.95 ),  
+  ("Not So Much Spam Plate", 3, 2, 0, 3.95 ),  
+  ("Don't Wany ANY SPAM! Plate", 0, 4, 3, 5.95 )  
+  ] )  
+</code></pre>
+
+<h3>11.executemany_rowcount(query, parameters)：同上并返回影响的行数。</h3>
+
+<pre><code>.....
+cursor.executemany(query, parameters)
+return cursor.rowcount
+</code></pre>
+
+<h3>12.其他；</h3>
+
+<pre><code>update = execute_rowcount            #update(query, *parameters, **kwparameters)
+updatemany = executemany_rowcount    #updatemany(query,parameters)
+
+insert = execute_lastrowid           # insert(query, *parameters, **kwparameters)
+insertmany = executemany_lastrowid   # insertmany(query, parameters)
+</code></pre>
+
+<h2>二.class torndb.Row</h2>
+
+<p>A dict that allows for object-like property access syntax,</p>
+
+<pre><code>class Row(dict):
+"""A dict that allows for object-like property access syntax."""
+def __getattr__(self, name):
+    try:
+        return self[name]
+    except KeyError:
+        raise AttributeError(name)
+</code></pre>
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/linux/2015/04/06/terminator/" data-toggle="tooltip" data-placement="top" title="terminator使用与配置">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/tornado/2015/04/06/tornado-option/" data-toggle="tooltip" data-placement="top" title="tornado源码分析(1).option模块">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#linux基础" title="linux基础" rel="14">
+                                    linux基础
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="20">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#linux服务器" title="linux服务器" rel="10">
+                                    linux服务器
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Mysql" title="Mysql" rel="11">
+                                    Mysql
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#OS System" title="OS System" rel="7">
+                                    OS System
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#python技巧" title="python技巧" rel="21">
+                                    python技巧
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#redis" title="redis" rel="14">
+                                    redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#django" title="django" rel="8">
+                                    django
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#tornado" title="tornado" rel="6">
+                                    tornado
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Shell" title="Shell" rel="7">
+                                    Shell
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#git" title="git" rel="5">
+                                    git
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#web开发" title="web开发" rel="2">
+                                    web开发
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#jQuery" title="jQuery" rel="3">
+                                    jQuery
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#人生" title="人生" rel="4">
+                                    人生
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#备份" title="备份" rel="2">
+                                    备份
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Nginx" title="Nginx" rel="3">
+                                    Nginx
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#windows服务器" title="windows服务器" rel="3">
+                                    windows服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python模块" title="python模块" rel="2">
+                                    python模块
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#运维" title="运维" rel="4">
+                                    运维
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python奇技淫巧" title="python奇技淫巧" rel="4">
+                                    python奇技淫巧
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#python" title="python" rel="17">
+                                    python
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Unix网络编程" title="Unix网络编程" rel="7">
+                                    Unix网络编程
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#C" title="C" rel="2">
+                                    C
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#ops" title="ops" rel="3">
+                                    ops
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#book" title="book" rel="4">
+                                    book
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#mongodb" title="mongodb" rel="6">
+                                    mongodb
+                                </a>
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/stevensia">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Steven's Blog 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
