@@ -1,6 +1,6 @@
-_site/*
 .sass-cache
 Gruntfile.js
 Gemfile
 Gemfile.lock
-/restart.sh
+*.sh
+_site
