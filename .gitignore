@@ -2,5 +2,4 @@
 Gruntfile.js
 Gemfile
 Gemfile.lock
-*.sh
 _site
