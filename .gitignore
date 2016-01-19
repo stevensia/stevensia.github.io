@@ -1,5 +1,7 @@
 .sass-cache
 Gruntfile.js
-Gemfile
+#Gemfile
 Gemfile.lock
+Gemfile
 _site
+/*.md
