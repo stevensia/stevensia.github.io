@@ -26,7 +26,7 @@ highlighter: pygments
 permalink: pretty
 paginate: 10
 exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
-anchorjs: true                          # if you want to customize anchor. check out line:181 of `post.html`
+anchorjs: false                          # if you want to customize anchor. check out line:181 of `post.html`
 
 
 
@@ -63,7 +63,7 @@ kramdown:
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "Steven, Pythoner live in Shanghai."
-#sidebar-avatar: /img/me.jpeg      # use absolute URL, seeing it's used in both `/` and `/about/`
+#sidebar-avatar: https://img1.doubanio.com/icon/ul59259972-2.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
