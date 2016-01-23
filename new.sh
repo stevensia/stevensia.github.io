@@ -16,8 +16,7 @@ layout: post
 title:  "$TITLE"
 date:   "$DATE"
 categories: "$CATE"
-tags: "CATE"
-excerpt: 
+tags: "$CATE"
 ---
 " > $FILE
 
