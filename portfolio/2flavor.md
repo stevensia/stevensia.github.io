@@ -51,3 +51,5 @@ permalink: /favor/
 
 >[openpyxl]https://openpyxl.readthedocs.org/en/2.3.3/optimized.html()
 *This is online docuemnt for openpyxl which can manipulate Micro Excell 2010
+
+http://playbear.github.io/
