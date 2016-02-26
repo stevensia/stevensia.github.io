@@ -53,3 +53,5 @@ permalink: /favor/
 *This is online docuemnt for openpyxl which can manipulate Micro Excell 2010
 
 http://playbear.github.io/
+
+http://www.favicon.cc/
