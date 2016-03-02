@@ -5,7 +5,14 @@ header-img: "img/tunnel.jpg"
 ---
 
 <!doctype html>
+<script src="js/sorttable.js"></script>
 <style>
+.bordered thead {
+    background-color:#eee;
+    color:#666666;
+    font-weight: bold;
+    cursor: default;
+}
 .bordered table {
     *border-collapse: collapse; /* IE7 and lower */
     border-spacing: 0;
@@ -181,17 +188,14 @@ header-img: "img/tunnel.jpg"
 <table class="bordered">
     <thead>
     <tr>
-        <th>#</th>
         <th>Name</th>
         <th>Common Day</th>
         <th>Lunar Day</th>
     </tr>
     </thead>
 	
-	
 	{% for member in site.data.member %}
 	<tr>
-    <td>{{ member.id }}</td>
     <td>{{ member.name }}</td>
 	<td>{{ member.lunarday }}</td>
     <td>{{ member.commonday }}</td>
