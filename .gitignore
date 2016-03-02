@@ -4,5 +4,4 @@ Gruntfile.js
 Gemfile.lock
 Gemfile
 _site
-/*.md
 commit.sh
