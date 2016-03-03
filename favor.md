@@ -59,3 +59,6 @@ http://www.favicon.cc/
 http://www.pbccrc.org.cn/ 
 
 http://www.kryogenix.org/code/browser/sorttable/
+
+http://realnicky.iteye.com/
+* 这个杭州哥们的博客有意思
