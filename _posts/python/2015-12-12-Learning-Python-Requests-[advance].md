@@ -3,7 +3,7 @@ layout: post
 title:  Learning Python Requests [advance]
 date:   2015-12-12 15:13:27
 categories: python
-tags: python
+tags: Python
 excerpt: 
 ---
 
