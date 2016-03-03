@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Conquar 
+title: 征服
 date:   2016-02-26 08:57:00
 categories: Misc
 tags: Misc
