@@ -2,8 +2,9 @@
 layout: post
 title:  Learning Python encoding
 date:   2015-12-12 15:29:22
-categories: python
+categories: Python
 excerpt: 
+tags: "Python"
 ---
 * content
 {:toc}
