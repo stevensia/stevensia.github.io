@@ -61,4 +61,7 @@ http://www.pbccrc.org.cn/
 http://www.kryogenix.org/code/browser/sorttable/
 
 http://realnicky.iteye.com/
-* 这个杭州哥们的博客有意思
+*这个杭州哥们的博客有意思
+
+http://www.pic21.com/bizhi/a/541_1.htm
+*Clock image
