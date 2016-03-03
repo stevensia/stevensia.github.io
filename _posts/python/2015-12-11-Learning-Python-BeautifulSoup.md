@@ -3,7 +3,7 @@ layout: post
 title:  Learning Python BeautifulSoup
 date:   2015-12-11 07:18:03
 categories: Python
-tags: python
+tags: Python
 excerpt: 
 ---
 

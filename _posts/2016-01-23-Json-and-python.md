@@ -1,9 +1,9 @@
 ---
 layout: post
-title:  Json and python
+title:  Json and Python
 date:   2016-01-23 21:22:18
-categories: python
-tags: python
+categories: Python
+tags: Python
 ---
 
 #### 什么是json：
@@ -18,7 +18,7 @@ JSON建构于两种结构：
 
 jso官方说明参见：http://json.org/
 
-Python操作json的标准api库参考：http://docs.python.org/library/json.html
+Python操作json的标准api库参考：http://docs.Python.org/library/json.html
 
 对简单数据类型的encoding 和 decoding：
 
@@ -35,7 +35,7 @@ Python操作json的标准api库参考：http://docs.python.org/library/json.html
 [[1, 2, 3], 123, 123.123, 'abc', {'key2': (4, 5, 6), 'key1': (1, 2, 3)}] 
 [[1, 2, 3], 123, 123.123, "abc", {"key2": [4, 5, 6], "key1": [1, 2, 3]}]
 
-通过输出的结果可以看出，简单类型通过encode之后跟其原始的repr()输出结果非常相似，但是有些数据类型进行了改变，例如上例中的元组则转换为了列表。在json的编码过程中，会存在从python原始类型向json类型的转化过程，具体的转化对照如下：
+通过输出的结果可以看出，简单类型通过encode之后跟其原始的repr()输出结果非常相似，但是有些数据类型进行了改变，例如上例中的元组则转换为了列表。在json的编码过程中，会存在从Python原始类型向json类型的转化过程，具体的转化对照如下：
 
 ![image](http://images.cnblogs.com/cnblogs_com/coser/201112/201112141621131652.png)
 
@@ -53,7 +53,7 @@ json.dumps()方法返回了一个str对象encodedjson，我们接下来在对enc
     
     [[1, 2, 3], 123, 123.123, u'abc', {u'key2': [4, 5, 6], u'key1': [1, 2, 3]}]
 
-loads方法返回了原始的对象，但是仍然发生了一些数据类型的转化。比如，上例中‘abc’转化为了unicode类型。从json到python的类型转化对照如下：
+loads方法返回了原始的对象，但是仍然发生了一些数据类型的转化。比如，上例中‘abc’转化为了unicode类型。从json到Python的类型转化对照如下：
 
 ![image](http://images.cnblogs.com/cnblogs_com/coser/201112/201112141621146178.png)
 
