@@ -1,12 +1,12 @@
 # Site settings
-title: Steven's Blog
-SEOTitle: Steven's Blog!
+title: SIA's Blog
+SEOTitle: SIA's Blog!
 #header-img: img/bigshows/coding1.jpg
 header-img: img/siashow/clock1.jpg
 email: araylee2004@163.com
 #description: "关于编程，beginman的个人技术总结，读书笔记，心得等 | 这里是 @BeginMan 的个人博客，与君共勉。"
-description: "个人技术总结，读书笔记，心得等 | 这里是 Stevensia的个人博客，与君共勉。"
-keyword: "Python, Steven的博客, Steven Blog, linux"
+description: "个人技术总结，读书笔记，心得等 | 这里是 SIA的个人博客，与君共勉。"
+keyword: "Python, SIA的博客, SIA Blog, linux"
 url: "http://universus.cn"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 
@@ -14,11 +14,11 @@ baseurl: ""                             # for example, '/blog' if your blog host
 
 # SNS settings
 RSS: true
-#weibo_username:     beginman
-#zhihu_username:     beginman
+#weibo_username:     
+#zhihu_username:     
 github_username:     stevensia
-#twitter_username:  fpsir
-#facebook_username:  huxpro
+#twitter_username:  
+#facebook_username:  
 
 
 
@@ -42,12 +42,12 @@ kramdown:
 
 
 # Disqus settings
-#disqus_username: beginman
+#disqus_username: 
 
 # Duoshuo settings
-#duoshuo_username: huxblog
+#duoshuo_username: 
 # Share component is depend on Comment so we can NOT use share only.
-#duoshuo_share: true                     # set to false if you want to use Comment without Sharing
+#duoshuo_share: true      # set to false if you want to use Comment without Sharing
 
 
 
@@ -63,7 +63,7 @@ kramdown:
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
-sidebar-about-description: "Steven, Pythoner live in Shanghai."
+sidebar-about-description: "SIA, Pythoner lives in Shanghai."
 #sidebar-avatar: https://img1.doubanio.com/icon/ul59259972-2.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
@@ -79,20 +79,5 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 #     {
 #         title: "天镶的博客",
 #         href: "http://lingyu.wang/"
-#     },{
-#         title: "Luke的自留地",
-#         href: "http://hmqk1995.github.io"
-#     },{
-#         title: "SmdCn's Blog",
-#         href: "http://blog.smdcn.net"
-#     },{
-#         title: "解旻的博客",
-#         href: "http://xieminis.me/"
-#     },{
-#         title: "DHong Say",
-#         href: "http://dhong.co"
-#     },{
-#         title: "尹峰以为",
-#         href: "http://ingf.github.io/"
 #     }
 # ]
