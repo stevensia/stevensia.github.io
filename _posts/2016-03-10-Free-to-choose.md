@@ -1,12 +1,10 @@
-﻿---
-
+﻿--- 
 layout: post  
 title: 自由选择  
 date: 2016-03-10 19:44:23  
 categories: Misc   
 tags: "Misc Reading"  
-
----
+--- 
 
 原作名: Free to Choose: A Personal Statement
 
