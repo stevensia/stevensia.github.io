@@ -4,7 +4,7 @@ title: Favor
 subtitle: Favorites of some articles or books. 
 permalink: /favor/
 ---
->[Economics](http://universus.cn/_data/economics.html)
+>[Economics](http://universus.cn/economics.html)  
 *Economics
 
 >[Bash Tips and Tricks](http://www.caliban.org/bash/index.shtml)  
@@ -65,5 +65,5 @@ http://www.kryogenix.org/code/browser/sorttable/
 http://realnicky.iteye.com/
 *这个杭州哥们的博客有意思
 
-http://www.pic21.com/bizhi/a/541_1.htm
+http://www.pic21.com/bizhi/a/541_1.htm  
 *Clock image
