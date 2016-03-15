@@ -4,6 +4,8 @@ title: Favor
 subtitle: Favorites of some articles or books. 
 permalink: /favor/
 ---
+>[Economics](http://universus.cn/_data/economics.html)
+*Economics
 
 >[Bash Tips and Tricks](http://www.caliban.org/bash/index.shtml)  
  *Working more productively with bash 2.x/3.x*
