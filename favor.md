@@ -66,4 +66,14 @@ http://realnicky.iteye.com/
 *这个杭州哥们的博客有意思
 
 http://www.pic21.com/bizhi/a/541_1.htm  
-*Clock image
+*Clock image*
+
+
+
+{% for tasks in site.data.links%}
+<blockquote>
+  <p><a href={{links.link}}>{{links.title}}</a><br />
+ <em>{{links.subtitle}}</em></p>
+</blockquote>
+ {% endfor %}
+
