@@ -54,21 +54,6 @@ permalink: /favor/
 >[openpyxl](https://openpyxl.readthedocs.org/en/2.3.3/optimized.html)
 *This is online docuemnt for openpyxl which can manipulate Micro Excell 2010
 
-http://playbear.github.io/
-
-http://www.favicon.cc/
-
-http://www.pbccrc.org.cn/ 
-
-http://www.kryogenix.org/code/browser/sorttable/
-
-http://realnicky.iteye.com/
-*这个杭州哥们的博客有意思
-
-http://www.pic21.com/bizhi/a/541_1.htm  
-*Clock image*
-
-
 
 {% for links in site.data.links%}
 <blockquote>
