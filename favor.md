@@ -72,8 +72,8 @@ http://www.pic21.com/bizhi/a/541_1.htm
 
 {% for links in site.data.links%}
 <blockquote>
-  <p><a href={{links.link}}>{{links.title}}</a><br />
- <em>{{links.subtitle}}</em></p>
+  <p><a href="{{links.link}}">"{{links.title}}"</a><br />
+ <em>"{{links.subtitle}}"</em></p>
 </blockquote>
  {% endfor %}
 
