@@ -1,9 +1,3 @@
-.bordered thead {
-    background-color:#eee;
-    color:#666666;
-    font-weight: bold;
-    cursor: default;
-}
 .bordered table {
     *border-collapse: collapse; /* IE7 and lower */
     border-spacing: 0;
