@@ -1,5 +1,6 @@
 num,title,detail
 01,Linux IOPS,"Will prepare a guide for IOPS on linux, and then Windows or ESXi maybe"
-,"1.iozone to benchmark and nmon to monitor;<br> 2.fio ","<a href=https://www.cammckenzie.com/blog/index.php/2014/02/25/how-to-measure-iops-with-linux/>https://www.cammckenzie.com/blog/index.php/2014/02/25/how-to-measure-iops-with-linux</a>"
+,"1.iozone to benchmark and nmon to monitor;<br> 2.fio ","<a href=https://www.cammckenzie.com/blog/index.php/2014/02/25/how-to-measure-iops-with-linux/>https://www.cammckenzie.com/blog/index.php/2014/02/25/how-to-measure-iops-with-linux</a>"<br>"http://www.thattommyhall.com/2011/02/18/iops-linux-iostat/"
 02,Reading,"每个月至少看两本书，减少看技术书籍和历史书籍的数量，营销和管理，会计的要开始看了。"
 03,"CloudArray","1. Lab整理<br>2. 培训资料整理"
+04,书籍：无限度的人,作者 韦恩.W.戴埃
