@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title:  Shell script for Tianya
 date:   2016-03-18 11:57:41
