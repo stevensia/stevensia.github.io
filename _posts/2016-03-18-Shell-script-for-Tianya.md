@@ -4,7 +4,6 @@ title: "Shell for Tianya"
 date:   2016-03-20 10:44:55
 categories: shell
 tags: shell
-autor: Steven
 ---
 
 抓取天涯论坛楼主贴的shell脚本：

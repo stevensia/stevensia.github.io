@@ -1,12 +1,11 @@
 ---
 layout: post
-title: jQuery test 
-subtitle: "This is for jQuery test"
-date:   2016-01-20 10:44:55
-categories: js
-tags: javascript
-autor: Steven
+title: "Economics 笔记" 
+date:   2016-03-18 10:44:55
+categories: Reading
+tag: Reading
 ---
+
 #### 这个Economics的白手起家噱头标题，内容真是多，我用wget拿下来所有70页，然后只取楼主的内容，结果还是有5.4M之多，估计得有50万字，真实吓死人，所谓高手在民间！ 
 #### 下面都是七七八八摘录下来的句子，希望不看了的时候回头来能看出一些内容。
 
@@ -133,11 +132,5 @@ autor: Steven
 企业的宗旨不是赚钱而是满足消费者的需要。
 
 消费者要的不是任何实体的产品，不是钻子，消费者要的是一套解决方案，是一种生活方式－－一种没有老鼠的生活方式。
-
-
-
-
-
-
 
 
