@@ -1,10 +1,9 @@
 ---
 layout: post
-title: jQuery test 
-subtitle: "This is for jQuery test"
+title: "Shell for Tianya"
 date:   2016-01-20 10:44:55
-categories: js
-tags: javascript
+categories: shell
+tags: shell
 autor: Steven
 ---
 
@@ -20,3 +19,4 @@ autor: Steven
     echo "Working on $i"
     cat post-enterprise-101309-$i.shtml |awk 'BEGIN{a=0;b=0;c=0}/class="host">楼主/{a=1;print}/时间/&&a{print;b=1}/bbs-content/&&a&&b{c=1}a&&b&&c{print}/\/div/&&a&&b&&c{print;a=0;b=0;c=0}' |uniq >>economics.txt
     done
+
