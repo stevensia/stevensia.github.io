@@ -1,9 +1,11 @@
 ---
 layout: post
-title:  Shell script for Tianya
-date:   2016-03-18 11:57:41
-categories: Misc
-tags: Misc
+title: jQuery test 
+subtitle: "This is for jQuery test"
+date:   2016-01-20 10:44:55
+categories: js
+tags: javascript
+autor: Steven
 ---
 
 抓取天涯论坛楼主贴的shell脚本：
