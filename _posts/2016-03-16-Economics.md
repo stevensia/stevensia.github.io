@@ -17,7 +17,7 @@ tags: Reading
     for i in `seq 1 70`
     do 
     echo "Working on $i"
-    cat post-enterprise-101309-$i.shtml |awk 'BEGIN{a=0;b=0;c=0;d=0}/class="host">楼主/{a=1;print}/时间/&&a{print;b=1}/bbs-content/&&a&&b{c=1}a&&b&&c{print}/\/div/&&a&&b&&c{print;a=0;b=0;c=0}' |uniq >>economics.txt
+    cat post-enterprise-101309-$i.shtml |awk 'BEGIN{a=0;b=0;c=0}/class="host">楼主/{a=1;print}/时间/&&a{print;b=1}/bbs-content/&&a&&b{c=1}a&&b&&c{print}/\/div/&&a&&b&&c{print;a=0;b=0;c=0}' |uniq >>economics.txt
     done
 
 如那个海飞丝的广告词“头屑去无踪”。去头皮屑就是它的战略。而拉芳的卖点是什么，风影的创意又是什么。说实话我到现在也搞不清楚。
