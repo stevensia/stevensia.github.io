@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Shell for Tianya"
-date:   2016-01-20 10:44:55
+date:   2016-03-20 10:44:55
 categories: shell
 tags: shell
 autor: Steven
