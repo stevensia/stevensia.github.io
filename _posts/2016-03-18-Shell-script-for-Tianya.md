@@ -5,9 +5,7 @@ date:   2016-03-20 10:44:55
 categories: shell
 tags: shell
 ---
-
 抓取天涯论坛楼主贴的shell脚本：
-
 
     for i in `seq 1 70`
     do
