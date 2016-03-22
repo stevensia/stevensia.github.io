@@ -30,7 +30,7 @@ header-img: "img/siashow/tunnel.jpg"
 <table class="sortable">
     <thead>
     <tr>
-        <th>Name</th>
+        <th class="sorttable_nosort">Name</th>
         <th>Lunar Day</th>
         <th>Common Day</th>
     </tr>
@@ -38,8 +38,8 @@ header-img: "img/siashow/tunnel.jpg"
 	
 	{% for member in site.data.member %}
 	<tr>
-    <td class="sorttable_nosort">{{ member.name }}</td>
-	<td>{{ member.lunarday }}</td>
+    <td >{{ member.name }}</td>
+	<td sorttable_customkey="{{member.sort}}">{{ member.lunarday }}</td>
     <td>{{ member.commonday }}</td>
     </tr>
 	{% endfor %}
