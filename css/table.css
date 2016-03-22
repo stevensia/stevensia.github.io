@@ -1,4 +1,4 @@
-.bordered {
+.sortable {
     border: solid #ccc 1px;
     -moz-border-radius: 6px;
     -webkit-border-radius: 6px;
@@ -7,18 +7,18 @@
     -moz-box-shadow: 0 1px 1px #ccc; 
     box-shadow: 0 1px 1px #ccc;         
 }
-.bordered table {
+.sortable table {
     *border-collapse: collapse; /* IE7 and lower */
     border-spacing: 0;
     width: 100%;    
 }
-.bordered thead {
+.sortable thead {
     background-color:#eee;
     color:#666666;
     font-weight: bold;
     cursor: default;
 }
-.bordered tr:hover {
+.sortable tr:hover {
     background: #fbf8e9;
     -o-transition: all 0.1s ease-in-out;
     -webkit-transition: all 0.1s ease-in-out;
@@ -27,14 +27,14 @@
     transition: all 0.1s ease-in-out;     
 }    
     
-.bordered td, .bordered th {
+.sortable td, .sortable th {
     border-left: 1px solid #ccc;
     border-top: 1px solid #ccc;
     padding: 10px;
     text-align: left;    
 }
 
-.bordered th {
+.sortable th {
     background-color: #dce9f9;
     background-image: -webkit-gradient(linear, left top, left bottom, from(#ebf3fc), to(#dce9f9));
     background-image: -webkit-linear-gradient(top, #ebf3fc, #dce9f9);
@@ -49,35 +49,35 @@
     text-shadow: 0 1px 0 rgba(255,255,255,.5); 
 }
 
-.bordered td:first-child, .bordered th:first-child {
+.sortable td:first-child, .sortable th:first-child {
     border-left: none;
 }
 
-.bordered th:first-child {
+.sortable th:first-child {
     -moz-border-radius: 6px 0 0 0;
     -webkit-border-radius: 6px 0 0 0;
     border-radius: 6px 0 0 0;
 }
 
-.bordered th:last-child {
+.sortable th:last-child {
     -moz-border-radius: 0 6px 0 0;
     -webkit-border-radius: 0 6px 0 0;
     border-radius: 0 6px 0 0;
 }
 
-.bordered th:only-child{
+.sortable th:only-child{
     -moz-border-radius: 6px 6px 0 0;
     -webkit-border-radius: 6px 6px 0 0;
     border-radius: 6px 6px 0 0;
 }
 
-.bordered tr:last-child td:first-child {
+.sortable tr:last-child td:first-child {
     -moz-border-radius: 0 0 0 6px;
     -webkit-border-radius: 0 0 0 6px;
     border-radius: 0 0 0 6px;
 }
 
-.bordered tr:last-child td:last-child {
+.sortable tr:last-child td:last-child {
     -moz-border-radius: 0 0 6px 0;
     -webkit-border-radius: 0 0 6px 0;
     border-radius: 0 0 6px 0;
