@@ -1,0 +1,40 @@
+---
+layout: default 
+title: "Collections"
+header-img: "img/siashow/tunnel.jpg"
+---
+
+<header class="intro-header" style="background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                <div class="site-heading">
+                    <span class="subheading">
+<br>树立无法企及的目标！</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+<table class="bordered">
+    <thead>
+    <tr>
+        <th>Number</th>
+        <th>Title</th>
+        <th>Detail</th>
+    </tr>
+    </thead>
+	{% for tasks in site.data.investment%}
+	<tr>
+    <td>{{ tasks.title}}</td>
+	<td>{{ tasks.detail}}</td>
+    <td><a href={{ tasks.link}}>链接<a></td>
+	<td>{{ tasks.date}}</td>
+    </tr>
+	{% endfor %}
+</table>
+
+ 
+
