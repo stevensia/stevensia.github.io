@@ -1,36 +1,10 @@
 ---
 layout: post
 title: Collections
-subtitle: Collections of my reading books
+subtitle: 今年的目标是50本书，这是毕业后第一次正式记录阅读进程，也是第一个目标，拭目以待!
 permalink: /collections/
 ---
 
-<!--
-<header class="intro-header" style="background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
-                <div class="site-heading">
-                    <span class="subheading">
--->
-
-<br>今年的目标是50本书，这是毕业后第一次正式记录阅读进程，也是第一个目标，拭目以待！<br>
-----致虚度的十年！！！</span>
-
-<hr>
-<!--
-<div id="times_container"  class="zebra" style="font-size:24px;text-align:center;color:#8A2BE2;font-family: 'Wire One', arial, serif; ">
-         <span id="times_day"> </span>天
-                                          <span id="times_hour"> </span>时
-                                          <span id="times_minute"> </span>分
-                                          <span id="second"> </span>秒
-</div>
--->
-                </div>
-            </div>
-        </div>
-    </div>
-</header>
 
 ### 2016   
 
