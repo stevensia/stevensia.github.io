@@ -5,45 +5,24 @@ subtitle: Collections of my reading books
 permalink: /collections/
 ---
 
->[Economics](http://universus.cn/economics.html)  
-*Economics
+###2016   
+> **目标50本书,这是毕业后第一次正式记录阅读进程，也是第一个目标，拭目以待！**
 
->[Bash Tips and Tricks](http://www.caliban.org/bash/index.shtml)  
- *Working more productively with bash 2.x/3.x*
+> - 201601
+>    金瓯缺20% 1.15
+>    张居正 2.25
 
->[Peteris Krumins' blog ](http://www.catonmat.net/)  
-*About programming, hacking, software reuse, software ideas, computer security, browserling, google and technology.*
+> - 201603
+>    大江东去 3.9
+>    Flask开发 JavaScript 3.15
+>    自由选择 20% 3.20
 
->[W3school](http://www.w3school.com.cn/)  
-*领先的Web技术教程- 全部免费,在W3school你可以找到你所需要的所有的网站建设教程。*  
-*从基础的 HTML 到 CSS，乃至进阶的XML、SQL、JS、PHP 和 ASP.NET。*
-
-
->2015  
-
-    康熙王朝
-    雍正王朝
-    乾隆王朝卷1
-    白鹿原
-    穆斯林葬礼
-
-
->2016  
-
-目标50本书
-******
-201601
-+金瓯缺20% 1.15
-+张居正 2.25
-201603
-+大江东去 3.9
-+Flask开发 JavaScript 3.15
--自由选择 20% 3.20
-201604
+#####201604
 +经济学白手起家30% 4.7
 +不得往生4.20
 +余生 4.30
-201605
+
+#####201605
 +三体卷1 5.8
 -广告人自白40% 5.10*********第10本
 +富爸爸穷爸爸 5.15
@@ -52,7 +31,8 @@ permalink: /collections/
 -范撒普自由之路6.19#####
 +简单会计学5.29****************第15本
 +启迪你头脑中的金融意识5.31#####
-201606
+
+#####201606
 +罗伯特滚滚财富6.3
 -潘伟君看盘细节 50% 6.9
 +富爸爸自由之路6.13
@@ -62,7 +42,8 @@ permalink: /collections/
 +期货入门6.25
 +股市大全1/8 6.24
 +股市大全2/8 6.28
-201607
+
+#####201607
 -苏菲的世界
 -货币银行学
 -大作手回忆录
@@ -70,6 +51,13 @@ permalink: /collections/
 -追求完美
 -百年孤独**************************第30本
 -国际关系学
+
+>2015  
+    康熙王朝
+    雍正王朝
+    乾隆王朝卷1
+    白鹿原
+    穆斯林葬礼
 
 
 书单
@@ -85,18 +73,4 @@ permalink: /collections/
 ##小说系列#####
 -做单
 -民企江湖
-
-
->[Economics](http://universus.cn/economics.html)  
-*Economics
-
->[Bash Tips and Tricks](http://www.caliban.org/bash/index.shtml)  
- *Working more productively with bash 2.x/3.x*
-
->[Peteris Krumins' blog ](http://www.catonmat.net/)  
-*About programming, hacking, software reuse, software ideas, computer security, browserling, google and technology.*
-
->[W3school](http://www.w3school.com.cn/)  
-*领先的Web技术教程- 全部免费,在W3school你可以找到你所需要的所有的网站建设教程。*  
-*从基础的 HTML 到 CSS，乃至进阶的XML、SQL、JS、PHP 和 ASP.NET。*
 
