@@ -1,18 +1,22 @@
 ---
-layout: default
+layout: post
 title: Collections
 subtitle: Collections of my reading books
 permalink: /collections/
 ---
-<!doctype html>
 
+<!--
 <header class="intro-header" style="background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
                 <div class="site-heading">
                     <span class="subheading">
-<br>—致虚度的十年！！！</span>
+-->
+
+<br>今年的目标是50本书，这是毕业后第一次正式记录阅读进程，也是第一个目标，拭目以待！<br>
+----致虚度的十年！！！</span>
+
 <hr>
 <!--
 <div id="times_container"  class="zebra" style="font-size:24px;text-align:center;color:#8A2BE2;font-family: 'Wire One', arial, serif; ">
@@ -29,7 +33,6 @@ permalink: /collections/
 </header>
 
 ### 2016   
-> **目标50本书,这是毕业后第一次正式记录阅读进程，也是第一个目标，拭目以待！**
 
 > - 201601  
 >    金瓯缺     20%     1.15  
@@ -45,33 +48,33 @@ permalink: /collections/
 >    
 > -  201605  
 >    三体卷1                5.8  
->    广告人自白40%          5.10*********第10本  
+>    广告人自白40%          5.10----------第10本  
 >    富爸爸穷爸爸           5.15  
->    舍费尔财务自由之路     5.20#####  
->    富爸爸投资指南         5.29#####  
->    范撒普自由之路         6.19#####  
->    简单会计学             5.29****************第15本  
->    启迪你头脑中的金融意识 5.31#####  
+>    舍费尔财务自由之路     5.20  
+>    富爸爸投资指南         5.29  
+>    范撒普自由之路         6.19  
+>    简单会计学             5.29----------第15本  
+>    启迪你头脑中的金融意识 5.31  
 >    
 > -  201606
 >    罗伯特滚滚财富        6.3  
 >    潘伟君看盘细节 50%    6.9  
 >    富爸爸自由之路        6.13  
 >    刘墉说话的技巧        6.16  
->    冰与火中国记忆        6.17***********第20本  
+>    冰与火中国记忆        6.17-----------第20本  
 >    大作手实录            6.22  
 >    期货入门              6.25  
 >    股市大全1/8           6.24  
 >    股市大全2/8           6.28  
 >    
 > -  201607
->    苏菲的世界  
->    货币银行学  
->    大作手回忆录  
->    股市大全3/8  
->    追求完美    
->    百年孤独**************************第30本  
->    国际关系学   
+    苏菲的世界  
+    货币银行学  
+    大作手回忆录  
+    股市大全3/8  
+    追求完美    
+    百年孤独----------------------------第30本  
+    国际关系学   
 
 ### 2015  
 
